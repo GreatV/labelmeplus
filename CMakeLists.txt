@@ -17,12 +17,16 @@ find_package(glog CONFIG REQUIRED)
 find_package(argparse CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
+find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
 
 set(PROJECT_SOURCES
         main.cpp
         app.cpp
         app.h
         init.h
+        utils/io.cpp
+        utils/shape.cpp
+        utils/utils.h
         imgviz.hpp
 )
 
@@ -48,6 +52,8 @@ else()
         )
     endif()
 endif()
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(${PROJECT_NAME} PRIVATE glog::glog)
