@@ -130,8 +130,8 @@ inline cv::Vec2i getTileShape(unsigned size, double hw_ratio = 1) {
 inline cv::Mat tile(const std::vector<cv::Mat> images,
              cv::Vec2i shape = cv::Vec2i(0, 0), const unsigned border_width = 5,
              const cv::Scalar border_color = cv::Scalar(255, 255, 255)) {
-  unsigned height = images[0].rows;
-  unsigned width = images[0].cols;
+  auto height = images[0].rows;
+  auto width = images[0].cols;
   for (size_t i = 1; i < images.size(); i++) {
     if (images[i].rows > height) {
       height = images[i].rows;
@@ -142,12 +142,12 @@ inline cv::Mat tile(const std::vector<cv::Mat> images,
   }
 
   if (shape[0] * shape[1] == 0) {
-    shape = getTileShape(/*size=*/images.size(),
+    shape = getTileShape(/*size=*/static_cast<unsigned int>(images.size()),
                          /*hw_ratio=*/static_cast<double>(height) /
                              static_cast<double>(width));
   }
-  unsigned rows = shape[0];
-  unsigned cols = shape[1];
+  auto rows = shape[0];
+  auto cols = shape[1];
 
   cv::Mat dst;
   for (size_t j = 0; j < rows; j++) {
@@ -261,9 +261,9 @@ inline cv::Mat labelToBgr(const cv::Mat label, const cv::Mat bgr,
 
   for (size_t j = 0; j < label.rows; j++) {
     for (size_t i = 0; i < label.cols; i++) {
-      cv::Vec3b bgr_color = bgr_.at<cv::Vec3b>(j, i);
-      cv::Vec3b label_color = getLabelColor(label.at<int32_t>(j, i) % 256);
-      label_bgr.at<cv::Vec3b>(j, i) =
+      cv::Vec3b bgr_color = bgr_.at<cv::Vec3b>((int)j, (int)i);
+      cv::Vec3b label_color = getLabelColor(label.at<int32_t>((int)j, (int)i) % 256);
+      label_bgr.at<cv::Vec3b>((int)j, (int)i) =
           alpha * label_color + (1 - alpha) * bgr_color;
     }
   }
