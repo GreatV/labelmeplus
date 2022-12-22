@@ -3,13 +3,17 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 
-namespace labelme
-{
-/// @brief shape type
-enum labeled_shape_type {
 
+/// @brief shape type
+enum marked_shape_type {
+    shape_circle = 0,
+    shape_rectangle,
+    shape_line,
+    shape_linestrip,
+    shape_point,
+    shape_polygon
 };
 
 void lblsave(const std::string& filename, const cv::Mat& lbl);
-}
+
 #endif

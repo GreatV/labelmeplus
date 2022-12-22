@@ -11,6 +11,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# https://json.nlohmann.me/api/macros/json_use_implicit_conversions/
+# set(nlohmann-json_IMPLICIT_CONVERSIONS OFF)
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(glog CONFIG REQUIRED)
@@ -18,16 +21,20 @@ find_package(argparse CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
+find_package(nlohmann_json CONFIG REQUIRED)
 
 set(PROJECT_SOURCES
+        init.h
         main.cpp
         app.cpp
         app.h
-        init.h
+        shape.h
+        shape.cpp
+        imgviz.hpp
         utils/io.cpp
         utils/shape.cpp
+        utils/qt.cpp
         utils/utils.h
-        imgviz.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -60,6 +67,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glog::glog)
 target_link_libraries(${PROJECT_NAME} PRIVATE argparse::argparse)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
