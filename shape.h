@@ -1,11 +1,11 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 
+#include <QAction>
 #include <QColor>
 #include <QPainter>
 #include <QPainterPath>
 #include <QRectF>
-
 
 QColor DEFAULT_LINE_COLOR=QColor(0, 255, 0, 128);  // bf hovering
 QColor DEFAULT_FILL_COLOR=QColor(0, 255, 0, 128);  // hovering
@@ -78,6 +78,14 @@ class Shape
 
   void drawVertex(QPainterPath path, int i);
   int nearestVertex(const QPointF& point, double epsilon);
+  int nearestEdge(const QPointF& point, double epsilon);
+  QPainterPath makePath();
+  bool containsPoint(const QPointF& point);
+  QRectF boundingRect();
+  void moveBy(const QPointF& offset);
+  void moveVertexBy(int i, const QPointF& offset);
+  void highlightVertex(int i, char action);
+  void highlightClear();
 };
 
 #endif

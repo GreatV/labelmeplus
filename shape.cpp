@@ -245,12 +245,89 @@ QRectF Shape::getCircleRectFromLine(const std::vector<QPointF>& line) {
   rectangle = QRectF(c.x() - d, c.y() - d, 2 * d, 2 * d);
   return rectangle;
 }
+
 int Shape::nearestVertex(const QPointF& point, const double epsilon) {
+  double min_distance = DBL_MAX;
+  int min_i = -1;
+  for (auto i = 0; i < points_.size(); ++i)
+  {
+    auto p = points_[i];
+    auto dist = distance(p - point);
+    if (dist < epsilon && dist < min_distance)
+    {
+      min_distance = dist;
+      min_i = i;
+    }
+  }
+  return min_i;
+}
+
+int Shape::nearestEdge(const QPointF& point, double epsilon) {
   double min_distance = DBL_MAX;
   int post_i = -1;
   for (auto i = 0; i < points_.size(); ++i)
   {
     std::vector<QPointF> line {points_[i - 1], points_[i]};
+    auto dist = distance_to_line(point, line);
+    if (dist <= epsilon && dist < min_distance)
+    {
+      min_distance = dist;
+      post_i = i;
+    }
   }
-  return 0;
+  return post_i;
+}
+QPainterPath Shape::makePath() {
+  QPainterPath path;
+  if (shape_type_ == "rectangle")
+  {
+    path = QPainterPath();
+    if (points_.size() == 2)
+    {
+      auto rectangle = getRectFromLine(points_[0], points_[1]);
+      path.addRect(rectangle);
+    }
+  }
+  else if (shape_type_ == "circle")
+  {
+    path = QPainterPath();
+
+    if (points_.size() == 2)
+    {
+      auto rectangle = getCircleRectFromLine(points_);
+      path.addEllipse(rectangle);
+    }
+  }
+  else
+  {
+    path = QPainterPath(points_[0]);
+    for (auto& p: points_)
+    {
+      path.lineTo(p);
+    }
+  }
+
+  return path;
+}
+bool Shape::containsPoint(const QPointF& point) {
+  return makePath().contains(point);
+}
+QRectF Shape::boundingRect() { return makePath().boundingRect(); }
+void Shape::moveBy(const QPointF& offset) {
+  for (auto& p: points_)
+  {
+    p += offset;
+  }
+}
+
+void Shape::moveVertexBy(const int i, const QPointF& offset)
+{
+  points_[i] += offset;
+}
+void Shape::highlightVertex(const int i, const char action) {
+ _highlightIndex = i;
+ _highlightMode = action;
+}
+void Shape::highlightClear() {
+ _highlightIndex = -1;
 }

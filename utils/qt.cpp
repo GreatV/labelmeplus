@@ -6,7 +6,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
 #include <QString>
-#include <opencv2/opencv.hpp>
+//#include <opencv2/opencv.hpp>
 
 #include "utils/utils.h"
 
@@ -91,9 +91,43 @@ QRegularExpressionValidator labelValidator() {
   return QRegularExpressionValidator(QRegularExpression("^[^ \t].+"), nullptr);
 }
 
-double distance(const cv::Point& p) { return sqrt(p.x * p.x + p.y * p.y); }
+static double dot(const QPointF& p1, const QPointF& p2)
+{
+  return p1.x() * p2.x() + p1.y() + p2.y();
+}
 
-double distancetoline() { return 0; }
+static double norm(const QPointF& p)
+{
+  return sqrt(dot(p, p));
+}
+
+static double cross(const QPointF& p1, const QPointF& p2)
+{
+  return p1.x() * p2.y() - p1.y() * p2.x();
+}
+
+double distance(const QPointF& p) { return sqrt(p.x() * p.x() + p.y() * p.y()); }
+
+double distance_to_line(const QPointF& point, const std::vector<QPointF>& line) {
+  auto p1 = line[0]; auto p2 = line[1];
+  if (dot(point - p1, p2 - p1) < 0)
+  {
+    return norm(point - p1);
+  }
+
+  if (dot(point - p2, p1 - p2) < 0)
+  {
+    return norm(point - p2);
+  }
+
+  if (norm(p2 - p1) == 0)
+  {
+    return 0;
+  }
+
+  // np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
+  return abs(cross(p2 - p1, p1 - point)) / norm(p2 - p1);
+}
 
 QString fmtShortcut(const QString& text) {
   auto items = text.split("+");
