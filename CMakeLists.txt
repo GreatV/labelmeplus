@@ -37,6 +37,10 @@ set(PROJECT_SOURCES
         utils/utils.h
 )
 
+if(WIN32)
+    add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
+endif()
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(labelmeplus
         MANUAL_FINALIZATION

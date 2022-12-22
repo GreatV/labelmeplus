@@ -1,6 +1,3 @@
-// #ifdef _WIN32
-// #define GLOG_NO_ABBREVIATED_SEVERITIES
-// #endif
 #include <fmt/core.h>
 #include <glog/logging.h>
 
@@ -13,10 +10,10 @@
 #include "app.h"
 #include "init.h"
 
-static std::map<std::string, int> logger_level_map{{"INFO", google::INFO},
-                                                   {"WARNING", google::WARNING},
-                                                   {"ERROR", google::ERROR},
-                                                   {"FATAL", google::FATAL}};
+static std::map<std::string, int> logger_level_map{{"INFO", google::GLOG_INFO},
+                                                   {"WARNING", google::GLOG_WARNING},
+                                                   {"ERROR", google::GLOG_ERROR},
+                                                   {"FATAL", google::GLOG_FATAL}};
 
 int main(int argc, char *argv[]) {
   FLAGS_logtostderr = true;
