@@ -22,6 +22,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(exiv2 CONFIG REQUIRED)
 
 set(PROJECT_SOURCES
         init.h
@@ -30,10 +31,13 @@ set(PROJECT_SOURCES
         app.h
         shape.h
         shape.cpp
+        label_file.cpp
+        label_file.h
         imgviz.hpp
         utils/io.cpp
         utils/shape.cpp
         utils/qt.cpp
+        utils/image.cpp
         utils/utils.h
 )
 
@@ -44,8 +48,7 @@ endif()
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(labelmeplus
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
+        ${PROJECT_SOURCES})
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET labelmeplus APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
@@ -72,6 +75,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE argparse::argparse)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE exiv2lib)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

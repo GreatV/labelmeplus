@@ -18,5 +18,7 @@ void lblsave(const std::string& filename, const cv::Mat& lbl);
 
 double distance(const QPointF& p);
 
-double  distance_to_line(const QPointF& point, const std::vector<QPointF>& line);
+double distance_to_line(const QPointF& point, const std::vector<QPointF>& line);
+
+cv::Mat apply_exif_orientation(const std::string& image_filepath, const cv::Mat& raw_image);
 #endif
