@@ -7,16 +7,14 @@
 #include <QPainterPath>
 #include <QRectF>
 
-QColor DEFAULT_LINE_COLOR=QColor(0, 255, 0, 128);  // bf hovering
-QColor DEFAULT_FILL_COLOR=QColor(0, 255, 0, 128);  // hovering
-QColor DEFAULT_SELECT_LINE_COLOR=QColor(255, 255, 255);  // selected
-QColor DEFAULT_SELECT_FILL_COLOR=QColor(0, 255, 0, 155);  // selected
-QColor DEFAULT_VERTEX_FILL_COLOR=QColor(0, 255, 0, 255);  // hovering
-QColor DEFAULT_HVERTEX_FILL_COLOR=QColor(255, 255, 255, 255);  // hovering
+QColor DEFAULT_LINE_COLOR = QColor(0, 255, 0, 128);              // bf hovering
+QColor DEFAULT_FILL_COLOR = QColor(0, 255, 0, 128);              // hovering
+QColor DEFAULT_SELECT_LINE_COLOR = QColor(255, 255, 255);        // selected
+QColor DEFAULT_SELECT_FILL_COLOR = QColor(0, 255, 0, 155);       // selected
+QColor DEFAULT_VERTEX_FILL_COLOR = QColor(0, 255, 0, 255);       // hovering
+QColor DEFAULT_HVERTEX_FILL_COLOR = QColor(255, 255, 255, 255);  // hovering
 
-
-class Shape
-{
+class Shape {
   // Render handles as squares
   char P_SQUARE = 0;
 
@@ -41,7 +39,8 @@ class Shape
   double scale = 1.0;
 
  public:
-  Shape(const QString& label, const QColor& line_color, const QString& shape_type, const QString& flags, int group_id);
+  Shape(const QString& label, const QColor& line_color,
+        const QString& shape_type, const QString& flags, int group_id);
   QString shape_type();
   void shape_type(QString value = "polygon");
   void close();

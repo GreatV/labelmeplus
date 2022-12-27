@@ -6,7 +6,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
 #include <QString>
-//#include <opencv2/opencv.hpp>
+// #include <opencv2/opencv.hpp>
 
 #include "utils/utils.h"
 
@@ -91,37 +91,33 @@ QRegularExpressionValidator labelValidator() {
   return QRegularExpressionValidator(QRegularExpression("^[^ \t].+"), nullptr);
 }
 
-static double dot(const QPointF& p1, const QPointF& p2)
-{
+static double dot(const QPointF& p1, const QPointF& p2) {
   return p1.x() * p2.x() + p1.y() + p2.y();
 }
 
-static double norm(const QPointF& p)
-{
-  return sqrt(dot(p, p));
-}
+static double norm(const QPointF& p) { return sqrt(dot(p, p)); }
 
-static double cross(const QPointF& p1, const QPointF& p2)
-{
+static double cross(const QPointF& p1, const QPointF& p2) {
   return p1.x() * p2.y() - p1.y() * p2.x();
 }
 
-double distance(const QPointF& p) { return sqrt(p.x() * p.x() + p.y() * p.y()); }
+double distance(const QPointF& p) {
+  return sqrt(p.x() * p.x() + p.y() * p.y());
+}
 
-double distance_to_line(const QPointF& point, const std::vector<QPointF>& line) {
-  auto p1 = line[0]; auto p2 = line[1];
-  if (dot(point - p1, p2 - p1) < 0)
-  {
+double distance_to_line(const QPointF& point,
+                        const std::vector<QPointF>& line) {
+  auto p1 = line[0];
+  auto p2 = line[1];
+  if (dot(point - p1, p2 - p1) < 0) {
     return norm(point - p1);
   }
 
-  if (dot(point - p2, p1 - p2) < 0)
-  {
+  if (dot(point - p2, p1 - p2) < 0) {
     return norm(point - p2);
   }
 
-  if (norm(p2 - p1) == 0)
-  {
+  if (norm(p2 - p1) == 0) {
     return 0;
   }
 
