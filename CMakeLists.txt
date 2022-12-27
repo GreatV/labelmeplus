@@ -20,9 +20,11 @@ find_package(glog CONFIG REQUIRED)
 find_package(argparse CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
-find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(exiv2 CONFIG REQUIRED)
+
+find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
+find_path(LIBEXIF_INCLUDE_DIRS "libexif/exif-data.h")
+find_library(LIBEXIF_LIBRARY "libexif")
 
 set(PROJECT_SOURCES
         init.h
@@ -67,15 +69,16 @@ else()
     endif()
 endif()
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS})
-
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(${PROJECT_NAME} PRIVATE glog::glog)
 target_link_libraries(${PROJECT_NAME} PRIVATE argparse::argparse)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(${PROJECT_NAME} PRIVATE exiv2lib)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${LIBEXIF_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBEXIF_LIBRARY})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
