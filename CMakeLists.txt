@@ -33,6 +33,8 @@ set(PROJECT_SOURCES
         app.h
         shape.h
         shape.cpp
+        base64.cpp
+        base64.h
         label_file.cpp
         label_file.h
         imgviz.hpp
