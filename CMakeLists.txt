@@ -71,16 +71,16 @@ else()
     endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(${PROJECT_NAME} PRIVATE glog::glog)
-target_link_libraries(${PROJECT_NAME} PRIVATE argparse::argparse)
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
-target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+        glog::glog
+        argparse::argparse
+        fmt::fmt-header-only
+        ${OpenCV_LIBS}
+        nlohmann_json::nlohmann_json
+        ${LIBEXIF_LIBRARY})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} PRIVATE ${LIBEXIF_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBEXIF_LIBRARY})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS}
+        ${LIBEXIF_INCLUDE_DIRS})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
