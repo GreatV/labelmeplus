@@ -15,6 +15,8 @@ static std::map<QString, int> shape_type_map{
 
 std::vector<QString> multi_points_shape{"polygon", "linestrip"};
 
+Shape::Shape() = default;
+
 Shape::Shape(const QString& label, const QColor& line_color,
              const QString& shape_type, const QString& flags, int group_id) {
   label_ = label;

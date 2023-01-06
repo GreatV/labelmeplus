@@ -15,6 +15,7 @@ QColor DEFAULT_VERTEX_FILL_COLOR = QColor(0, 255, 0, 255);       // hovering
 QColor DEFAULT_HVERTEX_FILL_COLOR = QColor(255, 255, 255, 255);  // hovering
 
 class Shape {
+ public:
   // Render handles as squares
   char P_SQUARE = 0;
 
@@ -39,6 +40,7 @@ class Shape {
   double scale = 1.0;
 
  public:
+  Shape();
   Shape(const QString& label, const QColor& line_color,
         const QString& shape_type, const QString& flags, int group_id);
   QString shape_type();
