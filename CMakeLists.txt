@@ -21,6 +21,7 @@ find_package(argparse CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(yaml-cpp CONFIG REQUIRED)
 
 find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
 find_path(LIBEXIF_INCLUDE_DIRS "libexif/exif-data.h")
@@ -43,6 +44,8 @@ set(PROJECT_SOURCES
         utils/qt.cpp
         utils/image.cpp
         utils/utils.h
+        widgets/label_dialog.cpp
+        widgets/label_dialog.h
 )
 
 if(WIN32)
@@ -75,8 +78,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
         glog::glog
         argparse::argparse
         fmt::fmt-header-only
-        ${OpenCV_LIBS}
         nlohmann_json::nlohmann_json
+        yaml-cpp
+        ${OpenCV_LIBS}
         ${LIBEXIF_LIBRARY})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS}
