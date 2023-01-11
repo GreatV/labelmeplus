@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <QRectF>
+#include <QRegularExpressionValidator>
 #include <opencv2/opencv.hpp>
 #include <string>
 
@@ -22,4 +23,8 @@ double distance_to_line(const QPointF& point, const std::vector<QPointF>& line);
 
 cv::Mat apply_exif_orientation(const std::string& image_filepath,
                                const cv::Mat& raw_image);
+
+QIcon newIcon(const QString& icon);
+QRegularExpressionValidator* labelValidator();
+
 #endif
