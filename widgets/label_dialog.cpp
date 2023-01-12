@@ -249,3 +249,76 @@ std::map<QString, bool> LabelDialog::getFlags() {
   }
   return flags;
 }
+int LabelDialog::getGroupId() {
+  auto group_id = edit_group_id_->text();
+  if (!group_id.isEmpty())
+  {
+    return group_id.toInt();
+  }
+  return -1;
+}
+void LabelDialog::popUp(QString& out_label, std::map<QString, bool>& out_flags,
+                        int& out_group_id, const QString& text, const bool move,
+                        const std::map<QString, bool>& flags, const int group_id) {
+  if (fit_to_content_["row"])
+  {
+    labelList_->setMinimumHeight(labelList_->sizeHintForRow(0) * labelList_->count() + 2);
+  }
+
+  if (fit_to_content_["column"])
+  {
+    labelList_->setMinimumWidth(labelList_->sizeHintForColumn(0) + 2);
+  }
+
+  // if text is None, the previous label in self.edit is kept
+  QString current_text;
+  if (text.isEmpty())
+  {
+    current_text = edit_->text();
+  }else
+  {
+    current_text = text;
+  }
+
+  if (!flags.empty())
+  {
+    setFlags(flags);
+  }else {
+    resetFlags(current_text);
+  }
+
+  edit_->setText(current_text);
+  edit_->setSelection(0, (int)current_text.size());
+
+  if (group_id < 0)
+  {
+    edit_group_id_->clear();
+  }else{
+    edit_group_id_->setText(QString::number(group_id));
+  }
+
+  auto items = labelList_->findItems(current_text, Qt::MatchFixedString);
+  if (!items.isEmpty())
+  {
+    if (items.size() != 1)
+    {
+      LOG(WARNING) << fmt::format("Label list has duplicate {0}", current_text.toStdString());
+    }
+    labelList_->setCurrentItem(items[0]);
+    auto row = labelList_->row(items[0]);
+    edit_->completer()->setCurrentRow(row);
+  }
+  edit_->setFocus(Qt::PopupFocusReason);
+
+  if (move)
+  {
+    this->move(QCursor::pos());
+  }
+
+  if (this->exec())
+  {
+    out_label = edit_->text();
+    out_flags = getFlags();
+    out_group_id = getGroupId();
+  }
+}

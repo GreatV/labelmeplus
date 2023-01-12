@@ -64,5 +64,13 @@ class LabelDialog: public QDialog
   void resetFlags(const QString& label = "");
   void setFlags(const std::map<QString, bool>& flags);
   std::map<QString, bool> getFlags();
+  int getGroupId();
+  void popUp(QString& out_label,
+             std::map<QString, bool>& out_flags,
+             int& out_group_id,
+             const QString& text = "",
+             bool move = true,
+             const std::map<QString, bool>& flags = {},
+             int group_id = -1);
 };
 #endif  // LABELMEPLUS_LABEL_DIALOG_H
