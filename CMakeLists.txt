@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(labelmeplus VERSION 0.1 LANGUAGES CXX)
+project(
+  labelmeplus
+  VERSION 0.1
+  LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -28,77 +31,75 @@ find_path(LIBEXIF_INCLUDE_DIRS "libexif/exif-data.h")
 find_library(LIBEXIF_LIBRARY "libexif")
 
 set(PROJECT_SOURCES
-        init.h
-        main.cpp
-        app.cpp
-        app.h
-        shape.h
-        shape.cpp
-        base64.cpp
-        base64.h
-        label_file.cpp
-        label_file.h
-        imgviz.hpp
-        utils/io.cpp
-        utils/shape.cpp
-        utils/qt.cpp
-        utils/image.cpp
-        utils/utils.h
-        widgets/label_dialog.cpp
-        widgets/label_dialog.h
-        widgets/label_list_widget.cpp
-        widgets/label_list_widget.h)
+    init.h
+    main.cpp
+    app.cpp
+    app.h
+    shape.h
+    shape.cpp
+    base64.cpp
+    base64.h
+    label_file.cpp
+    label_file.h
+    imgviz.hpp
+    utils/io.cpp
+    utils/shape.cpp
+    utils/qt.cpp
+    utils/image.cpp
+    utils/utils.h
+    widgets/label_dialog.cpp
+    widgets/label_dialog.h
+    widgets/label_list_widget.cpp
+    widgets/label_list_widget.h)
 
 if(WIN32)
-    add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
+  add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(labelmeplus
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES})
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET labelmeplus APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+  qt_add_executable(labelmeplus MANUAL_FINALIZATION ${PROJECT_SOURCES})
+  # Define target properties for Android with Qt 6 as: set_property(TARGET
+  # labelmeplus APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+  # ${CMAKE_CURRENT_SOURCE_DIR}/android) For more information, see
+  # https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
-    if(ANDROID)
-        add_library(${PROJECT_NAME} SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(${PROJECT_NAME}
-            ${PROJECT_SOURCES}
-        )
-    endif()
+  if(ANDROID)
+    add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
+    # Define properties for Android with Qt 5 after find_package() calls as:
+    # set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+  else()
+    add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+  endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-        glog::glog
-        argparse::argparse
-        fmt::fmt-header-only
-        nlohmann_json::nlohmann_json
-        yaml-cpp
-        ${OpenCV_LIBS}
-        ${LIBEXIF_LIBRARY})
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+          glog::glog
+          argparse::argparse
+          fmt::fmt-header-only
+          nlohmann_json::nlohmann_json
+          yaml-cpp
+          ${OpenCV_LIBS}
+          ${LIBEXIF_LIBRARY})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS}
-        ${LIBEXIF_INCLUDE_DIRS})
+                                                   ${LIBEXIF_INCLUDE_DIRS})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
+set_target_properties(
+  ${PROJECT_NAME}
+  PROPERTIES MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
+             MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+             MACOSX_BUNDLE_SHORT_VERSION_STRING
+             ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+             MACOSX_BUNDLE TRUE
+             WIN32_EXECUTABLE TRUE)
 
-install(TARGETS ${PROJECT_NAME}
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(
+  TARGETS ${PROJECT_NAME}
+  BUNDLE DESTINATION .
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(${PROJECT_NAME})
+  qt_finalize_executable(${PROJECT_NAME})
 endif()
