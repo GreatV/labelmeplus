@@ -1,5 +1,7 @@
 .idea/
 .vscode/
+# for pre-commit
+venv/
 # Prerequisites
 *.d
 
