@@ -46,7 +46,8 @@ set(PROJECT_SOURCES
         utils/utils.h
         widgets/label_dialog.cpp
         widgets/label_dialog.h
-)
+        widgets/label_list_widget.cpp
+        widgets/label_list_widget.h)
 
 if(WIN32)
     add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)

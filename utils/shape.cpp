@@ -1,7 +1,7 @@
 #include <glog/logging.h>
+
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-
 #include <vector>
 
 #include "utils/utils.h"
@@ -74,21 +74,19 @@ cv::Mat polygons_to_mask(const cv::Size& img_shape,
   return shape_to_mask(img_shape, polygons, shape_type);
 }
 
-void shapes_to_label(cv::Mat& cls, cv::Mat& ins, const cv::Size img_shape, const nlohmann::json& shapes, const std::map<std::string, int>& label_name_to_value)
-{
+void shapes_to_label(cv::Mat& cls, cv::Mat& ins, const cv::Size img_shape,
+                     const nlohmann::json& shapes,
+                     const std::map<std::string, int>& label_name_to_value) {
   cls = cv::Mat::zeros(img_shape, CV_8UC3);
   ins = cv::Mat::zeros(img_shape, CV_8UC3);
 }
 
-void labelme_shapes_to_label(cv::Mat& cls, cv::Mat& ins, cv::Size img_shape, const nlohmann::json& shapes)
-{
-  LOG(WARNING) << "labelme_shapes_to_label is deprecated, so please use shapes_to_label";
+void labelme_shapes_to_label(cv::Mat& cls, cv::Mat& ins, cv::Size img_shape,
+                             const nlohmann::json& shapes) {
+  LOG(WARNING)
+      << "labelme_shapes_to_label is deprecated, so please use shapes_to_label";
 
   std::map<std::string, int> label_name_to_value{{"_background_", 0}};
-
 }
 
-void masks_to_bboxes(const cv::Mat& masks)
-{
-  
-}
+void masks_to_bboxes(const cv::Mat& masks) {}

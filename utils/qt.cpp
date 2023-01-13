@@ -88,7 +88,8 @@ void addActions(QMenu* widget, QList<QMenu*> actions) {
 }
 
 QRegularExpressionValidator* labelValidator() {
-  return new QRegularExpressionValidator(QRegularExpression(R"(^[^ \t].+)"), nullptr);
+  return new QRegularExpressionValidator(QRegularExpression(R"(^[^ \t].+)"),
+                                         nullptr);
 }
 
 static double dot(const QPointF& p1, const QPointF& p2) {
