@@ -1,3 +1,4 @@
+fail_fast: false
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -17,3 +18,9 @@ repos:
     hooks:
     -    id: cmake-format
     -    id: cmake-lint
+
+# -   repo: https://github.com/pocc/pre-commit-hooks
+#     rev: v1.3.5
+#     hooks:
+#     -    id: clang-tidy
+#     -    id: cppcheck
