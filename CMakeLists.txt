@@ -50,7 +50,15 @@ set(PROJECT_SOURCES
     widgets/label_dialog.cpp
     widgets/label_dialog.h
     widgets/label_list_widget.cpp
-    widgets/label_list_widget.h)
+    widgets/label_list_widget.h
+    widgets/unique_label_qlist_widget.cpp
+    widgets/unique_label_qlist_widget.h
+    widgets/escapable_qlist_widget.cpp
+    widgets/escapable_qlist_widget.h
+    widgets/zoom_widget.cpp
+    widgets/zoom_widget.h
+    widgets/canvas.cpp
+    widgets/canvas.h)
 
 if(WIN32)
   add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
