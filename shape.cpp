@@ -8,7 +8,7 @@ std::vector<QString> valid_shape{
     "polygon", "rectangle", "point", "line", "circle", "linestrip",
 };
 
-static std::map<QString, int> shape_type_map{
+std::map<QString, int> shape_type_map{
     {"polygon", shape_polygon}, {"rectangle", shape_rectangle},
     {"point", shape_point},     {"line", shape_line},
     {"circle", shape_circle},   {"linestrip", shape_linestrip}};
@@ -22,7 +22,7 @@ Shape::Shape(const QString& label, const QColor& line_color,
   label_ = label;
   group_id_ = group_id;
   fill_ = false;
-  selected_ = false;
+  selected = false;
   shape_type_ = shape_type;
   flags_ = flags;
 
@@ -44,16 +44,16 @@ void Shape::shape_type(const QString value) {
       valid_shape.end()) {
     throw fmt::format("Unexpected shape_type: {1}", value.toStdString());
   }
-  _shape_type = value;
+  shape_type_ = value;
 }
 
 void Shape::close() { _closed = true; }
 
 void Shape::addPoint(const QPointF& point) {
-  if (!points_.empty() && point == points_[0]) {
+  if (!points.empty() && point == points[0]) {
     _closed = true;
   } else {
-    points_.emplace_back(point);
+    points.emplace_back(point);
   }
 }
 
@@ -64,21 +64,21 @@ bool Shape::canAddPoint() {
 
 QPointF Shape::popPoint() {
   QPointF point;
-  if (!points_.empty()) {
-    point = *(points_.end() - 1);
-    points_.pop_back();
+  if (!points.empty()) {
+    point = *(points.end() - 1);
+    points.pop_back();
     return point;
   }
   return point;
 }
 
 void Shape::insertPoint(int i, const QPointF& point) {
-  auto iter = points_.begin();
-  points_.insert(iter + i, point);
+  auto iter = points.begin();
+  points.insert(iter + i, point);
 }
 void Shape::removePoint(int i) {
-  auto iter = points_.begin();
-  points_.erase(iter + i);
+  auto iter = points.begin();
+  points.erase(iter + i);
 }
 bool Shape::isClosed() { return _closed; }
 void Shape::setOpen() { _closed = false; }
@@ -92,8 +92,8 @@ QRectF Shape::getRectFromLine(const QPointF& pt1, const QPointF& pt2) {
 
 void Shape::paint(QPainter painter) {
   QColor color;
-  if (!points_.empty()) {
-    color = selected_ ? select_line_color : line_color_;
+  if (!points.empty()) {
+    color = selected ? select_line_color : line_color_;
   }
   QPen pen = QPen(color);
   // Try using integer sizes for smoother drawing(?)
@@ -106,53 +106,53 @@ void Shape::paint(QPainter painter) {
   switch (shape_type_map[shape_type_]) {
     case shape_rectangle: {
       //      assert(len(self.points) in [1, 2])
-      if (points_.size() == 2) {
-        auto rectangle = getRectFromLine(points_[0], points_[1]);
+      if (points.size() == 2) {
+        auto rectangle = getRectFromLine(points[0], points[1]);
         line_path.addRect(rectangle);
       }
 
-      for (auto i = 0; i < points_.size(); ++i) {
+      for (auto i = 0; i < points.size(); ++i) {
         drawVertex(vrtx_path, i);
       }
       break;
     }
     case shape_circle: {
       //      assert()
-      if (points_.size() == 2) {
-        auto rectangle = getCircleRectFromLine(points_);
+      if (points.size() == 2) {
+        auto rectangle = getCircleRectFromLine(points);
         line_path.addEllipse(rectangle);
       }
 
-      for (auto i = 0; i < points_.size(); ++i) {
+      for (auto i = 0; i < points.size(); ++i) {
         drawVertex(vrtx_path, i);
       }
       break;
     }
     case shape_linestrip: {
-      line_path.moveTo(points_[0]);
+      line_path.moveTo(points[0]);
 
-      for (auto i = 0; i < points_.size(); ++i) {
-        auto p = points_[i];
+      for (auto i = 0; i < points.size(); ++i) {
+        auto p = points[i];
         line_path.lineTo(p);
         drawVertex(vrtx_path, i);
       }
       break;
     }
     default: {
-      line_path.moveTo(points_[0]);
+      line_path.moveTo(points[0]);
       // Uncommenting the following line will draw 2 paths
       // for the 1st vertex, and make it non-filled, which
       // may be desirable.
       // drawVertex(vrtx_path, 0);
 
-      for (auto i = 0; i < points_.size(); ++i) {
-        auto p = points_[i];
+      for (auto i = 0; i < points.size(); ++i) {
+        auto p = points[i];
         line_path.lineTo(p);
         drawVertex(vrtx_path, i);
       }
 
       if (isClosed()) {
-        line_path.lineTo(points_[0]);
+        line_path.lineTo(points[0]);
       }
 
       break;
@@ -164,7 +164,7 @@ void Shape::paint(QPainter painter) {
   painter.fillPath(vrtx_path, _vertex_fill_color);
 
   if (fill_) {
-    color = selected_ ? select_fill_color : fill_color;
+    color = selected ? select_fill_color : fill_color;
     painter.fillPath(line_path, color);
   }
 }
@@ -172,7 +172,7 @@ void Shape::paint(QPainter painter) {
 void Shape::drawVertex(QPainterPath path, int i) {
   auto d = point_size / scale;
   auto shape = point_type;
-  auto point = points_[i];
+  auto point = points[i];
 
   if (i == _highlightIndex) {
     double size;
@@ -212,8 +212,8 @@ QRectF Shape::getCircleRectFromLine(const std::vector<QPointF>& line) {
 int Shape::nearestVertex(const QPointF& point, const double epsilon) {
   double min_distance = DBL_MAX;
   int min_i = -1;
-  for (auto i = 0; i < points_.size(); ++i) {
-    auto p = points_[i];
+  for (auto i = 0; i < points.size(); ++i) {
+    auto p = points[i];
     auto dist = distance(p - point);
     if (dist < epsilon && dist < min_distance) {
       min_distance = dist;
@@ -226,8 +226,8 @@ int Shape::nearestVertex(const QPointF& point, const double epsilon) {
 int Shape::nearestEdge(const QPointF& point, double epsilon) {
   double min_distance = DBL_MAX;
   int post_i = -1;
-  for (auto i = 0; i < points_.size(); ++i) {
-    std::vector<QPointF> line{points_[i - 1], points_[i]};
+  for (auto i = 0; i < points.size(); ++i) {
+    std::vector<QPointF> line{points[i - 1], points[i]};
     auto dist = distance_to_line(point, line);
     if (dist <= epsilon && dist < min_distance) {
       min_distance = dist;
@@ -240,20 +240,20 @@ QPainterPath Shape::makePath() {
   QPainterPath path;
   if (shape_type_ == "rectangle") {
     path = QPainterPath();
-    if (points_.size() == 2) {
-      auto rectangle = getRectFromLine(points_[0], points_[1]);
+    if (points.size() == 2) {
+      auto rectangle = getRectFromLine(points[0], points[1]);
       path.addRect(rectangle);
     }
   } else if (shape_type_ == "circle") {
     path = QPainterPath();
 
-    if (points_.size() == 2) {
-      auto rectangle = getCircleRectFromLine(points_);
+    if (points.size() == 2) {
+      auto rectangle = getCircleRectFromLine(points);
       path.addEllipse(rectangle);
     }
   } else {
-    path = QPainterPath(points_[0]);
-    for (auto& p : points_) {
+    path = QPainterPath(points[0]);
+    for (auto& p : points) {
       path.lineTo(p);
     }
   }
@@ -265,16 +265,32 @@ bool Shape::containsPoint(const QPointF& point) {
 }
 QRectF Shape::boundingRect() { return makePath().boundingRect(); }
 void Shape::moveBy(const QPointF& offset) {
-  for (auto& p : points_) {
+  for (auto& p : points) {
     p += offset;
   }
 }
 
 void Shape::moveVertexBy(const int i, const QPointF& offset) {
-  points_[i] += offset;
+  points[i] += offset;
 }
 void Shape::highlightVertex(const int i, const char action) {
   _highlightIndex = i;
   _highlightMode = action;
 }
 void Shape::highlightClear() { _highlightIndex = -1; }
+
+QPointF Shape::operator[](int i) const {
+  if (i < 0) {
+    return *(points.end() - i);
+  }
+
+  return points[i];
+}
+QPointF& Shape::operator[](int i) {
+  if (i < 0) {
+    return *(points.end() - i);
+  }
+
+  return points[i];
+}
+size_t Shape::size() { return points.size(); }
