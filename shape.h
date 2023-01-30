@@ -43,7 +43,8 @@ class Shape {
  public:
   Shape();
   Shape(const QString& label, const QColor& line_color,
-        const QString& shape_type, const QString& flags, int group_id);
+        const QString& shape_type, const std::map<std::string, bool>& flags,
+        int group_id);
   QPointF operator[](int i) const;
   QPointF& operator[](int i);
   size_t size();
@@ -68,7 +69,7 @@ class Shape {
   bool containsPoint(const QPointF& point);
   QRectF boundingRect();
 
-  void paint(QPainter painter);
+  void paint(QPainter* painter);
 
  public:
   std::vector<QPointF> points;
@@ -77,7 +78,7 @@ class Shape {
   int group_id_;
   bool fill_;
   bool selected;
-  QString flags_;
+  std::map<std::string, bool> flags_;
 
   QString other_data_;
 

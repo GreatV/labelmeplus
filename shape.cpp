@@ -18,7 +18,8 @@ std::vector<QString> multi_points_shape{"polygon", "linestrip"};
 Shape::Shape() = default;
 
 Shape::Shape(const QString& label, const QColor& line_color,
-             const QString& shape_type, const QString& flags, int group_id) {
+             const QString& shape_type,
+             const std::map<std::string, bool>& flags, int group_id) {
   label_ = label;
   group_id_ = group_id;
   fill_ = false;
@@ -90,7 +91,7 @@ QRectF Shape::getRectFromLine(const QPointF& pt1, const QPointF& pt2) {
   return QRectF(x1, y1, x2 - x1, y2 - y1);
 }
 
-void Shape::paint(QPainter painter) {
+void Shape::paint(QPainter* painter) {
   QColor color;
   if (!points.empty()) {
     color = selected ? select_line_color : line_color_;
@@ -98,7 +99,7 @@ void Shape::paint(QPainter painter) {
   QPen pen = QPen(color);
   // Try using integer sizes for smoother drawing(?)
   pen.setWidth(std::max(1, int(round(2.0 / scale))));
-  painter.setPen(pen);
+  painter->setPen(pen);
 
   auto line_path = QPainterPath();
   auto vrtx_path = QPainterPath();
@@ -159,13 +160,13 @@ void Shape::paint(QPainter painter) {
     }
   }
 
-  painter.drawPath(line_path);
-  painter.drawPath(vrtx_path);
-  painter.fillPath(vrtx_path, _vertex_fill_color);
+  painter->drawPath(line_path);
+  painter->drawPath(vrtx_path);
+  painter->fillPath(vrtx_path, _vertex_fill_color);
 
   if (fill_) {
     color = selected ? select_fill_color : fill_color;
-    painter.fillPath(line_path, color);
+    painter->fillPath(line_path, color);
   }
 }
 
