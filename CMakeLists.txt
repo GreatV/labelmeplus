@@ -25,6 +25,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+find_package(Boost REQUIRED COMPONENTS context)
 
 find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
 find_path(LIBEXIF_INCLUDE_DIRS "libexif/exif-data.h")
@@ -88,6 +89,7 @@ target_link_libraries(
           fmt::fmt-header-only
           nlohmann_json::nlohmann_json
           yaml-cpp
+          Boost::context
           ${OpenCV_LIBS}
           ${LIBEXIF_LIBRARY})
 
