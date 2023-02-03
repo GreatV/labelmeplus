@@ -59,7 +59,9 @@ set(PROJECT_SOURCES
     widgets/zoom_widget.cpp
     widgets/zoom_widget.h
     widgets/canvas.cpp
-    widgets/canvas.h)
+    widgets/canvas.h
+    widgets/tool_bar.cpp
+    widgets/tool_bar.h)
 
 if(WIN32)
   add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
