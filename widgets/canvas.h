@@ -11,6 +11,8 @@
 
 #include "shape.h"
 
+using namespace lmp;
+
 typedef boost::coroutines2::coroutine<std::tuple<double, int, QPointF>> coro_t;
 
 static Qt::CursorShape CURSOR_DEFAULT = Qt::ArrowCursor;
@@ -32,18 +34,24 @@ class Canvas : public QWidget {
                                                            {"linestrip",
                                                             false}},
                   QWidget* parent = nullptr);
+  QList<Shape*> selectedShapes_;
+  QList<Shape*> shapes_;
   unsigned char CREATE = 0;
   unsigned char EDIT = 1;
+
+  /* Menus:
+   * 0: right-click without selection and dragging of shapes
+   * 1: right-click with selection and dragging of shapes
+   */
+  QMenu* menus[2];
 
  private:
   QString createMode_ = "polygon";
   bool fill_drawing_ = false;
   unsigned char mode_;
-  std::vector<Shape*> shapes_;
-  std::vector<std::vector<Shape*>> shapesBackups_;
+  std::vector<QList<Shape*>> shapesBackups_;
   Shape* current_;
-  std::vector<Shape*> selectedShapes_;
-  std::vector<Shape*> selectedShapesCopy_;
+  QList<Shape*> selectedShapesCopy_;
 
   Shape* line_;
   QPointF prevPoint_;
@@ -67,11 +75,6 @@ class Canvas : public QWidget {
   bool movingShape_ = false;
   bool snapping_ = true;
   bool hShapeIsSelected_ = false;
-  /* Menus:
-   * 0: right-click without selection and dragging of shapes
-   * 1: right-click with selection and dragging of shapes
-   */
-  QMenu* menus_[2];
 
   double epsilon_;
   QString double_click_;
@@ -90,9 +93,11 @@ class Canvas : public QWidget {
   bool drawing();
   bool editing();
   void setEditing(bool value = true);
+  void loadShapes(const QList<Shape*>& shapes, bool replace = true);
 
   bool selectedVertex();
   bool selectedEdge();
+  void resetState();
 
  private:
   static void restoreCursor();
@@ -107,11 +112,11 @@ class Canvas : public QWidget {
                          const QPointF& point2,
                          const std::vector<QPointF>& points);
   bool closeEnough(const QPointF& p1, const QPointF& p2);
-  bool boundedMoveShapes(const std::vector<Shape*>& shapes, QPointF pos);
+  bool boundedMoveShapes(QList<Shape*> shapes, QPointF pos);
   void boundedMoveVertex(QPointF pos);
   void addPointToEdge();
   void removeSelectedPoint();
-  void selectShapes(const std::vector<Shape*>& shapes);
+  void selectShapes(const QList<Shape*>& shapes);
   void selectShapePoint(const QPointF& point,
                         const bool& multiple_selection_mode);
   void calculateOffsets(const QPointF& point);
@@ -119,10 +124,10 @@ class Canvas : public QWidget {
   bool endMove(bool copy);
   void hideBackgroundShapes(bool value);
   bool canCloseShape();
-  std::vector<Shape*> deleteSelected();
+  QList<Shape*> deleteSelected();
   void deleteShape(Shape* shape);
-  std::vector<Shape*> duplicateSelectedShapes();
-  void boundedShiftShapes(const std::vector<Shape*>& shapes);
+  QList<Shape*> duplicateSelectedShapes();
+  void boundedShiftShapes(const QList<Shape*>& shapes);
   QSize sizeHint();
   QSize minimumSizeHint();
   void moveByKeyBoard(const QPointF& offset);
@@ -131,10 +136,8 @@ class Canvas : public QWidget {
   void undoLastLine();
   void undoLastPoint();
   void loadPixmap(QPixmap* pixmap, bool clear_shapes = true);
-  void loadShapes(const std::vector<Shape*>& shapes, bool replace = true);
   void setShapeVisible(Shape* shape, bool value);
   void overrideCursor(const QCursor& cursor);
-  void resetState();
 
  protected:
   void enterEvent(QEnterEvent* event) override;
@@ -153,7 +156,7 @@ class Canvas : public QWidget {
   void zoomRequest(int, QPointF);
   void scrollRequest(int, int);
   void newShape();
-  void selectionChanged(std::vector<Shape*>);
+  void selectionChanged(QList<lmp::Shape*>);
   void shapedMove();
   void drawingPolygon(bool);
   void vertexSelected(bool);

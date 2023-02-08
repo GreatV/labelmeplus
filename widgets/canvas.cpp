@@ -64,12 +64,12 @@ void Canvas::createMode(const QString &value) {
   createMode_ = value;
 }
 void Canvas::storeShapes() {
-  std::vector<Shape *> shapesBackup;
+  QList<Shape *> shapesBackup;
   for (auto &shape : shapes_) {
     shapesBackup.emplace_back(shape);
   }
 
-  std::vector<std::vector<Shape *>> shapesBackups;
+  std::vector<QList<Shape *>> shapesBackups;
   if (shapesBackups_.size() > num_backups_) {
     // self.shapesBackups = self.shapesBackups[-self.num_backups - 1: ]
     std::move(shapesBackups_.end() - num_backups_, shapesBackups_.end(),
@@ -166,7 +166,7 @@ void Canvas::setEditing(const bool value) {
 void Canvas::deSelectShape() {
   if (!selectedShapes_.empty()) {
     setHiding(false);
-    std::vector<Shape *> selectedShapes{};
+    QList<Shape *> selectedShapes{};
     emit selectionChanged(selectedShapes);
     hShapeIsSelected_ = false;
     this->update();
@@ -406,7 +406,7 @@ void Canvas::mousePressEvent(QMouseEvent *event) {
 void Canvas::mouseReleaseEvent(QMouseEvent *event) {
   if (event->button() == Qt::RightButton) {
     size_t pos = selectedShapesCopy_.empty() ? 0 : 1;
-    auto *menu = menus_[pos];
+    auto *menu = menus[pos];
     restoreCursor();
     if (!menu->exec(this->mapToGlobal(event->pos())) &&
         !selectedShapesCopy_.empty()) {
@@ -418,7 +418,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event) {
   } else if (event->button() == Qt::LeftButton) {
     if (editing()) {
       if (hShape_ != nullptr && hShapeIsSelected_ && !movingShape_) {
-        std::vector<Shape *> selectedShapes;
+        QList<Shape *> selectedShapes;
         for (auto &shape : selectedShapes_) {
           if (shape != hShape_) {
             selectedShapes.emplace_back(shape);
@@ -673,8 +673,7 @@ bool Canvas::closeEnough(const QPointF &p1, const QPointF &p2) {
   return distance(p1 - p2) < (epsilon_ / scale_);
 }
 
-bool Canvas::boundedMoveShapes(const std::vector<Shape *> &shapes,
-                               QPointF pos) {
+bool Canvas::boundedMoveShapes(QList<Shape *> shapes, QPointF pos) {
   if (outOfPixmap(pos)) {
     return false;
   }
@@ -751,10 +750,10 @@ void Canvas::selectShapePoint(const QPointF &point,
     auto shape = hShape_;
     shape->highlightVertex(index, Shape::MOVE_VERTEX);
   } else {
-    std::vector<Shape *> shapes;
-    std::move(shapes_.begin(), shapes_.end(), std::back_inserter(shapes));
-    std::reverse(shapes.begin(), shapes.end());
-    for (auto &shape : shapes) {
+    QList<Shape *> new_shapes;
+    std::move(shapes_.begin(), shapes_.end(), std::back_inserter(new_shapes));
+    std::reverse(new_shapes.begin(), new_shapes.end());
+    for (auto &shape : new_shapes) {
       if (isVisible(shape) && shape->containsPoint(point)) {
         setHiding();
         if (std::find(selectedShapes_.begin(), selectedShapes_.end(), shape) !=
@@ -764,7 +763,7 @@ void Canvas::selectShapePoint(const QPointF &point,
             selectedShapes.emplace_back(shape);
             emit selectionChanged(selectedShapes);
           } else {
-            std::vector<Shape *> selectedShapes;
+            QList<Shape *> selectedShapes;
             selectedShapes.emplace_back(shape);
             emit selectionChanged(selectedShapes);
           }
@@ -847,13 +846,13 @@ bool Canvas::canCloseShape() {
   return drawing() && current_ != nullptr && current_->size() > 2;
 }
 
-void Canvas::selectShapes(const std::vector<Shape *> &shapes) {
+void Canvas::selectShapes(const QList<Shape *> &shapes) {
   setHiding();
   emit selectionChanged(shapes);
   this->update();
 }
-std::vector<Shape *> Canvas::deleteSelected() {
-  std::vector<Shape *> deleted_shapes{};
+QList<Shape *> Canvas::deleteSelected() {
+  QList<Shape *> deleted_shapes{};
   if (!selectedShapes_.empty()) {
     for (auto &shape : selectedShapes_) {
       auto iter = std::remove(shapes_.begin(), shapes_.end(), shape);
@@ -878,7 +877,7 @@ void Canvas::deleteShape(Shape *shape) {
   storeShapes();
   this->update();
 }
-std::vector<Shape *> Canvas::duplicateSelectedShapes() {
+QList<Shape *> Canvas::duplicateSelectedShapes() {
   if (!selectedShapes_.empty()) {
     selectedShapesCopy_.clear();
     selectedShapesCopy_.shrink_to_fit();
@@ -890,7 +889,7 @@ std::vector<Shape *> Canvas::duplicateSelectedShapes() {
   }
   return selectedShapes_;
 }
-void Canvas::boundedShiftShapes(const std::vector<Shape *> &shapes) {
+void Canvas::boundedShiftShapes(const QList<Shape *> &shapes) {
   /*
    * Try to move in one direction, and if it fails in another.
    * Give up if both fail.
@@ -997,12 +996,11 @@ void Canvas::loadPixmap(QPixmap *pixmap, const bool clear_shapes) {
   this->update();
 }
 
-void Canvas::loadShapes(const std::vector<Shape *> &shapes,
-                        const bool replace) {
+void Canvas::loadShapes(const QList<Shape *> &shapes, const bool replace) {
   if (replace) {
-    shapes_ = shapes;
+    this->shapes_ = shapes;
   } else {
-    std::copy(shapes.begin(), shapes.end(), std::back_inserter(shapes_));
+    std::copy(shapes.begin(), shapes.end(), std::back_inserter(this->shapes_));
   }
   storeShapes();
   delete current_;
