@@ -43,6 +43,10 @@ set(PROJECT_SOURCES
     label_file.cpp
     label_file.h
     imgviz.hpp
+    os.h
+    os.c
+    opener.h
+    opener.c
     utils/io.cpp
     utils/shape.cpp
     utils/qt.cpp
@@ -61,7 +65,9 @@ set(PROJECT_SOURCES
     widgets/canvas.cpp
     widgets/canvas.h
     widgets/tool_bar.cpp
-    widgets/tool_bar.h)
+    widgets/tool_bar.h
+    widgets/brightness_contrast_dialog.h
+    widgets/brightness_contrast_dialog.cpp)
 
 if(WIN32)
   add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
