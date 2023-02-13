@@ -455,7 +455,7 @@ void Canvas::mouseDoubleClickEvent(QMouseEvent *event) {
 }
 
 void Canvas::paintEvent(QPaintEvent *event) {
-  if (pixmap_ != nullptr) {
+  if (pixmap_.isNull()) {
     return QWidget::paintEvent(event);
   }
 
@@ -467,7 +467,7 @@ void Canvas::paintEvent(QPaintEvent *event) {
   p->scale(scale_, scale_);
   p->translate(offsetToCenter());
 
-  p->drawPixmap(0, 0, *pixmap_);
+  p->drawPixmap(0, 0, pixmap_);
 
   // draw crosshair
   if (crosshair_[createMode_.toStdString()] && drawing() &&
@@ -556,8 +556,8 @@ QPointF Canvas::transformPos(QPointF point) {
 QPointF Canvas::offsetToCenter() {
   auto s = scale_;
   auto area = QWidget::size();
-  auto w = pixmap_->width() * s;
-  auto h = pixmap_->height() * s;
+  auto w = pixmap_.width() * s;
+  auto h = pixmap_.height() * s;
   auto aw = area.width();
   auto ah = area.height();
   auto x = aw > w ? (aw - w) / (2 * s) : 0;
@@ -566,8 +566,8 @@ QPointF Canvas::offsetToCenter() {
 }
 
 bool Canvas::outOfPixmap(const QPointF &p) {
-  auto w = pixmap_->width();
-  auto h = pixmap_->height();
+  auto w = pixmap_.width();
+  auto h = pixmap_.height();
   return !((0 <= p.x() && p.x() <= w - 1) && (0 <= p.y() && p.y() <= h - 1));
 }
 
@@ -577,7 +577,7 @@ bool Canvas::outOfPixmap(const QPointF &p) {
  * http://paulbourke.net/geometry/pointlineplane/
  */
 QPointF Canvas::intersectionPoint(const QPointF &p1, const QPointF &p2) {
-  auto size = pixmap_->size();
+  auto size = pixmap_.size();
   std::vector<QPointF> points{
       {0, 0},
       {size.width() - 1.0, 0},
@@ -683,8 +683,8 @@ bool Canvas::boundedMoveShapes(QList<Shape *> shapes, QPointF pos) {
   }
   auto o2 = pos + std::get<1>(offsets_);
   if (outOfPixmap(o2)) {
-    pos += QPointF(std::min(0.0, pixmap_->width() - o2.x()),
-                   std::min(0.0, pixmap_->height() - o2.y()));
+    pos += QPointF(std::min(0.0, pixmap_.width() - o2.x()),
+                   std::min(0.0, pixmap_.height() - o2.y()));
   }
   /*
    * XXX: The next line tracks the new position of the cursor
@@ -780,9 +780,9 @@ void Canvas::selectShapePoint(const QPointF &point,
 }
 
 void Canvas::calculateOffsets(const QPointF &point) {
-  double left = pixmap_->width() - 1;
+  double left = pixmap_.width() - 1;
   double right = 0;
-  double top = pixmap_->height() - 1;
+  double top = pixmap_.height() - 1;
   double bottom = 0;
   for (auto &shape : selectedShapes_) {
     auto rect = shape->boundingRect();
@@ -910,8 +910,8 @@ void Canvas::boundedShiftShapes(const QList<Shape *> &shapes) {
 QSize Canvas::sizeHint() { return minimumSizeHint(); }
 
 QSize Canvas::minimumSizeHint() {
-  if (pixmap_ != nullptr) {
-    return scale_ * pixmap_->size();
+  if (pixmap_.isNull()) {
+    return scale_ * pixmap_.size();
   }
   return QWidget::minimumSizeHint();
 }
@@ -983,7 +983,7 @@ void Canvas::undoLastPoint() {
   this->update();
 }
 
-void Canvas::loadPixmap(QPixmap *pixmap, const bool clear_shapes) {
+void Canvas::loadPixmap(const QPixmap &pixmap, const bool clear_shapes) {
   pixmap_ = pixmap;
   if (clear_shapes) {
     for (auto &shape : shapes_) {
@@ -1017,8 +1017,7 @@ void Canvas::setShapeVisible(Shape *shape, const bool value) {
 }
 void Canvas::resetState() {
   restoreCursor();
-  delete pixmap_;
-  pixmap_ = nullptr;
+  pixmap_ = QPixmap();
   for (auto &shape_list : shapesBackups_) {
     for (auto &shape : shape_list) {
       delete shape;
