@@ -67,7 +67,9 @@ set(PROJECT_SOURCES
     widgets/tool_bar.cpp
     widgets/tool_bar.h
     widgets/brightness_contrast_dialog.h
-    widgets/brightness_contrast_dialog.cpp)
+    widgets/brightness_contrast_dialog.cpp
+    widgets/file_dialog_preview.h
+    widgets/file_dialog_preview.cpp)
 
 if(WIN32)
   add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
