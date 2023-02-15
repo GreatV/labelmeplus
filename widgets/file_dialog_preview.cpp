@@ -43,7 +43,8 @@ FileDialogPreview::FileDialogPreview(QWidget *parent, const QString &caption,
 
   this->setFixedSize(this->width() + 300, this->height());
   //    this->setLayout(box);
-  QObject::connect(this, SIGNAL(currentChanged(QString)), this, SLOT(onChange));
+  QObject::connect(this, SIGNAL(currentChanged(QString)), this,
+                   SLOT(onChange(QString)));
 }
 
 void FileDialogPreview::onChange(const QString &path) {

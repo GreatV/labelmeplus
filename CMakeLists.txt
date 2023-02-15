@@ -47,6 +47,8 @@ set(PROJECT_SOURCES
     os.c
     opener.h
     opener.c
+    config/config.h
+    config/config.cpp
     utils/io.cpp
     utils/shape.cpp
     utils/qt.cpp

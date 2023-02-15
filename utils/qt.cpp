@@ -1,4 +1,3 @@
-#include <QAction>
 #include <QDir>
 #include <QIcon>
 #include <QMenu>
@@ -10,7 +9,7 @@
 
 #include "utils/utils.h"
 
-QDir here = QDir(QDir(__FILE__).absolutePath()).dirName();
+inline QDir here = QDir(QDir(__FILE__).absolutePath()).dirName();
 
 QIcon newIcon(const QString& icon) {
   auto icons_dir = QDir::cleanPath(here.absolutePath() + QDir::separator() +
@@ -35,50 +34,55 @@ QPushButton* newButton(const QString& text, const QString& icon,
   return b;
 }
 
-QAction* newAction(QObject* parent, QString text, const QObject* receiver,
-                   const char* slot, const QList<QKeySequence>& shortcuts,
-                   const QString& icon, const QString& tip,
-                   bool checkable = false, bool enable = true,
-                   bool checked = false) {
-  QAction* a = new QAction(text, parent);
-  if (!icon.isEmpty()) {
-    a->setIconText(text.replace(" ", "\n"));
-    a->setIcon(newIcon(icon));
+QAction* newAction(QObject* parent, QString text,
+                   const QList<QKeySequence>& shortcut, const QString& icon,
+                   const QString& tip, bool checkable, bool enable,
+                   bool checked) {
+  // Create a new action and assign callbacks, shortcuts, etc.
+  auto* action = new QAction(text, parent);
+  if (icon.isEmpty()) {
+    action->setIconText(text.replace(" ", "\n"));
+    action->setIcon(newIcon(icon));
   }
 
-  if (!shortcuts.empty()) {
-    a->setShortcuts(shortcuts);
+  if (!shortcut.isEmpty()) {
+    action->setShortcuts(shortcut);
   }
 
   if (!tip.isEmpty()) {
-    a->setToolTip(tip);
-    a->setStatusTip(tip);
-  }
-
-  if (slot != nullptr) {
-    QObject::connect(a, SIGNAL(triggered()), receiver, slot);
+    action->setToolTip(tip);
+    action->setStatusTip(tip);
   }
 
   if (checkable) {
-    a->setCheckable(true);
+    action->setCheckable(true);
   }
-
-  a->setEnabled(enable);
-  a->setChecked(checked);
-
-  return a;
+  action->setEnabled(enable);
+  action->setChecked(checked);
+  return action;
 }
 
-void addActions(QMenu* widget, QList<QAction*> actions) {
+void addActions(QToolBar* widget, const QList<QAction*>& actions) {
   for (auto& action : actions) {
     if (action == nullptr) {
       widget->addSeparator();
+    } else {
+      widget->addAction(action);
     }
-    widget->addAction(action);
   }
 }
 
-void addActions(QMenu* widget, QList<QMenu*> actions) {
+void addActions(QMenu* widget, const QList<QAction*>& actions) {
+  for (auto& action : actions) {
+    if (action == nullptr) {
+      widget->addSeparator();
+    } else {
+      widget->addAction(action);
+    }
+  }
+}
+
+void addActions(QMenu* widget, const QList<QMenu*>& actions) {
   for (auto& action : actions) {
     if (action == nullptr) {
       widget->addSeparator();

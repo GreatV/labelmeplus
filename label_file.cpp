@@ -3,19 +3,18 @@
 #include <fmt/format.h>
 #include <glog/logging.h>
 
-#include <algorithm>
-#include <filesystem>
+#include <QDir>
+#include <QFileInfo>
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include <opencv2/opencv.hpp>
-#include <string_view>
+#include <vector>
 
 #include "base64.h"
 #include "init.h"
 #include "utils/utils.h"
 
-std::vector<std::string_view> split(std::string_view strv,
-                                    std::string_view delims = " ") {
+static std::vector<std::string_view> split(std::string_view strv,
+                                           std::string_view delims = " ") {
   std::vector<std::string_view> output;
   size_t first = 0;
 
@@ -33,162 +32,190 @@ std::vector<std::string_view> split(std::string_view strv,
   return output;
 }
 
-LabelFile::LabelFile(const QString& filename) {
-  if (!filename.isEmpty()) {
-    load(filename);
+LabelFile::LabelFile(const QString& filepath) : filename(filepath) {
+  if (!filepath.isEmpty()) {
+    load(filepath);
   }
-  filename_ = filename;
 }
-cv::Mat LabelFile::load_image_file(const std::string& filename) {
+cv::Mat LabelFile::load_image_file(const QString& filepath) {
   cv::Mat raw_image;
   try {
-    raw_image = cv::imread(filename, cv::IMREAD_UNCHANGED);
+    raw_image = cv::imread(filepath.toStdString(), cv::IMREAD_UNCHANGED);
   } catch (...) {
-    LOG(ERROR) << fmt::format("Failed opening image file: {1}", filename);
+    LOG(ERROR) << fmt::format("Failed opening image file: {1}",
+                              filepath.toStdString());
     return raw_image;
   }
   // apply orientation to image according to exif
-  cv::Mat image = apply_exif_orientation(filename, raw_image);
+  cv::Mat image = apply_exif_orientation(filepath.toStdString(), raw_image);
 
   return image;
 }
-void LabelFile::load(const QString& filename) {
-  std::vector<QString> keys{"version", "imageData",   "imagePath", "shapes",
-                            "flags",   "imageHeight", "imageWidth"};
+void LabelFile::load(const QString& filepath) {
+  std::vector<std::string> keys{
+      "version",     "imageData",  "imagePath",
+      "shapes",  // polygonal annotations
+      "flags",   // image level flags
+      "imageHeight", "imageWidth",
+  };
 
-  std::vector<QString> shape_keys{"label", "points", "group_id", "flags"};
+  std::vector<std::string> shape_keys{
+      "label", "points", "group_id", "shape_type", "flags",
+  };
 
-  nlohmann::json data;
-  std::fstream label_json(filename.toStdString(), std::ios::in);
-  if (label_json.is_open()) {
-    try {
-      data = nlohmann::json::parse(label_json);
-    } catch (...) {
-      label_json.close();
-      return;
+  nlohmann::json data{};
+  try {
+    std::fstream f(filepath.toStdString());
+    data = nlohmann::json::parse(f);
+    f.close();
+    std::string version{};
+    if (data["version"].is_null()) {
+      LOG(WARNING) << fmt::format("Loading JSON file {} of unknown version.",
+                                  filepath.toStdString());
+    } else {
+      version = data["version"].get<std::string>();
+      auto version_number = split(version, ".");
+      auto current_version_number = split(__version__, ".");
+      if (version_number[0] != current_version_number[0]) {
+        LOG(WARNING) << fmt::format(
+            "This JSON file {0} may be incompatible with "
+            "current labelmeplus. version in file: {1}, "
+            "current version: {2}",
+            filepath.toStdString(), version, __version__);
+      }
+    }
+
+    if (!data["imageData"].is_null()) {
+      auto encode = data["imageData"].get<std::string>();
+      auto decode = base64_decode(encode);
+      std::vector<uchar> raw_data(decode.begin(), decode.end());
+      imageData = cv::imdecode(raw_data, cv::IMREAD_UNCHANGED);
+    } else {
+      // relative path from label file to relative path from cwd.
+      auto dir = QFileInfo(filepath).dir();
+      auto image_path = data["imagePath"].get<std::string>();
+      imagePath = dir.relativeFilePath(QString::fromStdString(image_path));
+      imageData = load_image_file(imagePath);
+    }
+
+    flags = {};
+    if (!data["flags"].is_null()) {
+      for (auto& [key, value] : data["flags"].items()) {
+        flags[key] = value.get<bool>();
+      }
+    }
+    imagePath = QString::fromStdString(data["imagePath"].get<std::string>());
+    auto image_height = data["imageHeight"].get<int>();
+    auto image_width = data["imageWidth"].get<int>();
+    check_image_height_and_width(imageData, image_height, image_width);
+    //    std::vector<std::map<std::string, std::any>> shapes {};
+    for (auto& s : data["shapes"]) {
+      std::map<std::string, std::any> shape{};
+      shape["label"] = s["label"].get<std::string>();
+      std::vector<std::vector<double>> points{};
+      for (auto& point : s["points"]) {
+        std::vector<double> p{};
+        for (auto& item : point) {
+          p.emplace_back(item.get<double>());
+        }
+        points.emplace_back(p);
+      }
+      shape["points"] = points;
+      shape["shape_type"] = std::string("polygon");
+      if (!s["shape_type"].is_null()) {
+        shape["shape_type"] = s["shape_type"].get<std::string>();
+      }
+
+      shape["flags"] = {};
+
+      if (!s["flags"].is_null()) {
+        shape["flags"] = s["flags"].get<std::map<std::string, bool>>();
+      }
+      shape["group_id"] = -1;
+      if (!s["group_id"].is_null()) {
+        shape["group_id"] = s["group_id"].get<int>();
+      }
+      std::map<std::string, std::any> other_data = {};
+      for (auto& [k, v] : s.items()) {
+        if (std::find(shape_keys.begin(), shape_keys.end(), k) ==
+            shape_keys.end()) {
+          other_data[k] = v;
+        }
+      }
+      shape["other_data"] = other_data;
+
+      shapes.emplace_back(shape);
+    }
+  } catch (std::exception& e) {
+    throw e;
+  }
+
+  otherData = {};
+
+  filename = filepath;
+
+  otherData = {};
+  for (auto& [key, value] : data.items()) {
+    if (std::find(keys.begin(), keys.end(), key) != keys.end()) {
+      otherData[key] = value;
     }
   }
-  label_json.close();
-
-  if (data["version"].is_null()) {
-    LOG(WARNING) << fmt::format("Loading JSON file ({1}) of unknown version",
-                                filename.toStdString());
-  }
-  auto version = data["version"].get<std::string>();
-
-  auto version_number = split(version, ".");
-  auto current_version_number = split(__version__, ".");
-  if (version_number[0] != current_version_number[0]) {
-    LOG(WARNING) << fmt::format(
-        "This json file ({1}) may be incompatible with current labelme. "
-        "version in file: {2}, current version: {3}",
-        filename.toStdString(), version, __version__);
-  }
-
-  cv::Mat image_data;
-  if (!data["imageData"].is_null()) {
-    auto data_encoded = data["imageData"].get<std::string>();
-    auto data_decoded = base64_decode(data_encoded);
-    std::vector<uchar> raw_data(data_decoded.begin(), data_decoded.end());
-    image_data = cv::imdecode(raw_data, cv::IMREAD_UNCHANGED);
-  } else {
-    // relative path from label file to relative path from cwd
-    auto image_path = data["imagePath"].get<std::string>();
-    auto dirname = std::filesystem::path(filename.toStdString()).parent_path();
-    image_path = (dirname / std::filesystem::path(image_path)).generic_string();
-    image_data = load_image_file(image_path);
-  }
-
-  auto flags = data["flags"].get<std::string>();
-  auto image_path = data["imagePath"].get<std::string>();
-
-  // check image height and width
-  int image_height = -1;
-  int image_width = -1;
-
-  if (!data["imageHeight"].is_null()) {
-    image_height = data["imageHeight"].get<int>();
-  }
-
-  if (!data["imageWidth"].is_null()) {
-    image_width = data["imageWidth"].get<int>();
-  }
-
-  std::tie(image_height, image_width) =
-      check_image_height_and_width(image_data, image_height, image_width);
-
-  std::vector<std::map<std::string, std::string>> shapes;
-  for (auto& s : data["shape"]) {
-    std::map<std::string, std::string> shape{
-        {"label", s["label"].get<std::string>()},
-        {"points", s["points"].get<std::string>()},
-        {"shape_type", s["shape_type"].get<std::string>()},
-        {"flags", s["flags"].get<std::string>()},
-        {"group_id", s["group_id"].get<std::string>()},
-        {"other_data", ""}};
-    shapes.emplace_back(shape);
-  }
-
-  //  other_data;
-  flags_ = flags;
 }
-std::tuple<int, int> LabelFile::check_image_height_and_width(
-    const cv::Mat& image_data, const int image_height, const int image_width) {
-  bool check_flag = false;
-  int h = image_height, w = image_width;
-  if (image_height != image_data.rows) {
-    check_flag |= true;
-  }
 
-  if (check_flag) {
+std::tuple<int, int> LabelFile::check_image_height_and_width(
+    const cv::Mat& image, const int image_height, const int image_width) {
+  int height = image_height, width = image_width;
+  if (image_height <= 0 && image.rows != image_height) {
     LOG(ERROR) << "imageHeight does not match with imageData or imagePath, "
                   "so getting imageHeight from actual image.";
-    h = image_data.rows;
+    height = image.rows;
   }
 
-  check_flag = false;
-  if (image_width != image_data.cols) {
-    check_flag |= true;
-  }
-
-  if (check_flag) {
+  if (image_width <= 0 && image.cols != image_width) {
     LOG(ERROR) << "imageWidth does not match with imageData or imagePath, "
                   "so getting imageWidth from actual image.";
-    w = image_data.cols;
+    width = image.cols;
   }
-
-  return std::tuple<int, int>{h, w};
+  return {height, width};
 }
-
 void LabelFile::save(
-    const std::string& filename,
-    const std::vector<std::map<std::string, std::any>>& shapes,
-    const std::string& imagePath, const int imageHeight, const int imageWidth,
-    const std::string& imageData,
-    const std::vector<std::map<std::string, std::any>>& otherData,
-    const std::vector<std::map<std::string, bool>>& flags) {
-  cv::Mat image_data;
-  if (!imageData.empty()) {
-    auto data_encoded = imageData;
-    auto data_decoded = base64_decode(data_encoded);
-    std::vector<uchar> raw_data(data_decoded.begin(), data_decoded.end());
-    image_data = cv::imdecode(raw_data, cv::IMREAD_UNCHANGED);
+    const QString& filepath,
+    const std::vector<std::map<std::string, std::any>>& shape_info_list,
+    const QString& image_path, const int image_height, const int image_width,
+    const cv::Mat& image_data,
+    const std::map<std::string, std::any>& other_data,
+    const std::map<std::string, bool>& flag_list) {
+  std::map<std::string, std::any> data{};
+  data["version"] = __version__;
+  data["flags"] = flag_list;
+  data["shapes"] = shape_info_list;
+  data["imagePath"] = image_path.toStdString();
+
+  if (!image_data.empty()) {
+    std::string image_format = ".png";
+    std::vector<uchar> buf;
+    cv::imencode(image_format, image_data, buf);
+    std::string raw_data = std::string((char*)buf.data());
+    data["imageData"] = raw_data;
+    int height, width;
+    std::tie(height, width) =
+        check_image_height_and_width(image_data, image_height, image_width);
+    data["imageHeight"] = height;
+    data["imageWidth"] = width;
   }
-  check_image_height_and_width(image_data, imageHeight, imageWidth);
 
-  nlohmann::json data;
-  auto content = data.dump(2, ' ', false);
+  for (auto& [key, value] : other_data) {
+    data[key] = value;
+  }
 
-  std::fstream output_json(filename);
-  output_json << content;
+  try {
+    std::fstream f(filepath.toStdString(), std::ios::out);
+    f.close();
+
+  } catch (...) {
+  }
 }
-
-bool LabelFile::is_label_file(const std::string& filename) {
-  const std::string suffix = ".json";
-
-  std::filesystem::path path(filename);
-  std::string ext = path.extension();
-  std::transform(ext.begin(), ext.end(), ext.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
-  return ext == suffix;
+bool LabelFile::is_label_file(const QString& filepath) {
+  auto file_suffix = QFileInfo(filepath).suffix();
+  return file_suffix.toLower() == suffix;
 }

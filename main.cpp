@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (parser["--version"] == true) {
-    fmt::print("{0} {1}\n", __appname__, __version__);
+    fmt::print("{0} {1}\n", __appname__.toStdString(), __version__);
     return 0;
   }
   auto logger_level = parser.get<std::string>("--logger-level");
@@ -92,13 +92,13 @@ int main(int argc, char *argv[]) {
   FLAGS_minloglevel = logger_level_map[logger_level];
 
   QApplication a(argc, argv);
-  a.setApplicationName(QString::fromStdString(__appname__));
+  a.setApplicationName(__appname__);
 
   QTranslator translator;
   const QStringList uiLanguages = QLocale::system().uiLanguages();
   for (const QString &locale : uiLanguages) {
     const QString baseName =
-        QString::fromStdString(fmt::format("{}_", __appname__)) +
+        QString::fromStdString(fmt::format("{}_", __appname__.toStdString())) +
         QLocale(locale).name();
     if (translator.load(":/i18n/" + baseName)) {
       a.installTranslator(&translator);
@@ -106,11 +106,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  std::string config = "";
-  std::string filename = "";
-  std::string output = "";
-  std::string output_file = "";
-  std::string output_dir = "";
+  YAML::Node config{};
+  QString filename{};
+  QString output{};
+  QString output_file{};
+  QString output_dir = {};
   app w = app(config, filename, output, output_file, output_dir);
   w.show();
   return a.exec();

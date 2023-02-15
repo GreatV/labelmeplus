@@ -46,6 +46,9 @@ Canvas::Canvas(const double epsilon, QString double_click,
    */
   line_ = new Shape();
 
+  menus[0] = new QMenu();
+  menus[1] = new QMenu();
+
   // set widget options
   this->setMouseTracking(true);
   this->setFocusPolicy(Qt::WheelFocus);

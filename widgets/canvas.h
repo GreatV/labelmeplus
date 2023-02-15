@@ -37,6 +37,7 @@ class Canvas : public QWidget {
   QList<Shape*> selectedShapes_;
   QList<Shape*> shapes_;
   std::vector<QList<Shape*>> shapesBackups_;
+  Shape* hShape_;
   double scale_ = 1.0;
   QPixmap pixmap_;
 
@@ -67,7 +68,6 @@ class Canvas : public QWidget {
   QPainter* painter_;
   QCursor cursor_ = QCursor(CURSOR_DEFAULT);
 
-  Shape* hShape_;
   Shape* prevShape_;
   int prevVertex_ = -1;
   int prevEdge_ = -1;
@@ -84,7 +84,6 @@ class Canvas : public QWidget {
 
  public:
   bool fillDrawing();
-  void setFillDrawing(bool value);
   QString createMode();
   void createMode(const QString& value);
   void storeShapes();
@@ -107,6 +106,10 @@ class Canvas : public QWidget {
   bool selectedEdge();
   void resetState();
   void loadPixmap(const QPixmap& pixmap, bool clear_shapes = true);
+  void removeSelectedPoint();
+  void deleteShape(Shape* shape);
+  QList<Shape*> deleteSelected();
+  bool endMove(bool copy);
 
  private:
   static void restoreCursor();
@@ -124,24 +127,18 @@ class Canvas : public QWidget {
   bool boundedMoveShapes(QList<Shape*> shapes, QPointF pos);
   void boundedMoveVertex(QPointF pos);
   void addPointToEdge();
-  void removeSelectedPoint();
 
   void selectShapePoint(const QPointF& point,
                         const bool& multiple_selection_mode);
   void calculateOffsets(const QPointF& point);
   void finalise();
-  bool endMove(bool copy);
+
   void hideBackgroundShapes(bool value);
   bool canCloseShape();
-  QList<Shape*> deleteSelected();
-  void deleteShape(Shape* shape);
   void boundedShiftShapes(const QList<Shape*>& shapes);
   QSize sizeHint();
   QSize minimumSizeHint();
   void moveByKeyBoard(const QPointF& offset);
-
-  void undoLastPoint();
-
   void overrideCursor(const QCursor& cursor);
 
  protected:
@@ -165,6 +162,10 @@ class Canvas : public QWidget {
   void shapedMove();
   void drawingPolygon(bool);
   void vertexSelected(bool);
+
+ private slots:
+  void undoLastPoint();
+  void setFillDrawing(bool value);
 };
 
 #endif  // LABELMEPLUS_CANVAS_H

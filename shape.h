@@ -6,6 +6,9 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QRectF>
+#include <any>
+
+namespace lmp {
 
 inline QColor DEFAULT_LINE_COLOR = QColor(0, 255, 0, 128);        // bf hovering
 inline QColor DEFAULT_FILL_COLOR = QColor(0, 255, 0, 128);        // hovering
@@ -24,10 +27,10 @@ class Shape {
   char P_ROUND = 1;
 
   // Flag for the handles we would move if dragging
-  static const char MOVE_VERTEX = 0;
+  inline static const char MOVE_VERTEX = 0;
 
   // Flag for all other handles on the current shape
-  static const char NEAR_VERTEX = 1;
+  inline static const char NEAR_VERTEX = 1;
 
   // The following class variables influence the drawing of all shape objects.
   QColor line_color = DEFAULT_LINE_COLOR;
@@ -78,20 +81,22 @@ class Shape {
   int group_id_;
   bool fill_;
   bool selected;
+  QString shape_type_;
   std::map<std::string, bool> flags_;
 
-  QString other_data_;
+  std::map<std::string, std::any> other_data_;
 
  private:
   int _highlightIndex;
   char _highlightMode;
   std::map<char, std::pair<double, char>> _highlightSettings;
   bool _closed;
-  QString shape_type_;
   QColor _vertex_fill_color;
 
   void drawVertex(QPainterPath path, int i);
   QPainterPath makePath();
 };
 
+};  // namespace lmp
+Q_DECLARE_METATYPE(lmp::Shape);
 #endif

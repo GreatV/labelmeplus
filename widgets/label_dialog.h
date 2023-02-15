@@ -1,58 +1,59 @@
 #ifndef LABELMEPLUS_LABEL_DIALOG_H
 #define LABELMEPLUS_LABEL_DIALOG_H
 
-
-#include <QLineEdit>
+#include <QCompleter>
 #include <QDialog>
 #include <QDialogButtonBox>
-#include <QPushButton>
+#include <QLineEdit>
 #include <QListWidget>
+#include <QPushButton>
 #include <QVBoxLayout>
-#include <QCompleter>
 
-
-class LabelQLineEdit: public QLineEdit
-{
+class LabelQLineEdit : public QLineEdit {
   QListWidget* list_widget_;
+
  public:
   void setListWidget(QListWidget* list_widget);
 
  protected:
-  void keyPressEvent(QKeyEvent *event) override;
+  void keyPressEvent(QKeyEvent* event) override;
 };
 
-class LabelDialog: public QDialog
-{
+class LabelDialog : public QDialog {
+  Q_OBJECT
+
  public:
-  explicit LabelDialog(const std::map<QString, bool>& fit_to_content,
-                       const std::map<QString, std::vector<QString>>& flags,
-                       const QStringList& labels,
-                       bool sort_labels = true,
-                       bool show_text_field = true,
-                       const QString& text = "Enter object label",
-                       const QString& completion = "startswith",
-                       QDialog* parent = nullptr);
+  explicit LabelDialog(
+      const std::map<std::string, bool>& fit_to_content,
+      const std::map<std::string, std::vector<std::string>>& flags,
+      const QStringList& labels, bool sort_labels = true,
+      bool show_text_field = true, const std::string& completion = "startswith",
+      QWidget* parent = nullptr, const QString& text = "Enter object label");
   void addLabelHistory(const QString& label);
+  void popUp(QString& out_label, std::map<std::string, bool>& out_flags,
+             int& out_group_id, const QString& text = "", bool move = true,
+             const std::map<std::string, bool>& flags = {}, int group_id = -1);
+
+  LabelQLineEdit* edit_;
 
  private:
-  std::map<QString, bool> fit_to_content_{
+  std::map<std::string, bool> fit_to_content_{
       {"row", false},
       {"column", true},
   };
-  LabelQLineEdit* edit_;
   QLineEdit* edit_group_id_;
 
   QVBoxLayout* layout_;
-  QDialogButtonBox* buttonBox_, * bb_;
+  QDialogButtonBox *buttonBox_, *bb_;
 
   QListWidget* labelList_;
 
   bool sort_labels_;
 
-  std::map<QString, std::vector<QString>> flags_;
+  std::map<std::string, std::vector<std::string>> flags_;
   QVBoxLayout* flagsLayout_;
 
-  QCompleter *completer_;
+  QCompleter* completer_;
 
  private slots:
   void labelSelected(QListWidgetItem* item);
@@ -62,15 +63,8 @@ class LabelDialog: public QDialog
   void updateFlags(const QString& label_new);
   void deleteFlags();
   void resetFlags(const QString& label = "");
-  void setFlags(const std::map<QString, bool>& flags);
-  std::map<QString, bool> getFlags();
+  void setFlags(const std::map<std::string, bool>& flags);
+  std::map<std::string, bool> getFlags();
   int getGroupId();
-  void popUp(QString& out_label,
-             std::map<QString, bool>& out_flags,
-             int& out_group_id,
-             const QString& text = "",
-             bool move = true,
-             const std::map<QString, bool>& flags = {},
-             int group_id = -1);
 };
 #endif  // LABELMEPLUS_LABEL_DIALOG_H

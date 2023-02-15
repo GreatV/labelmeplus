@@ -15,6 +15,7 @@ std::map<QString, int> shape_type_map{
 
 std::vector<QString> multi_points_shape{"polygon", "linestrip"};
 
+namespace lmp {
 Shape::Shape() = default;
 
 Shape::Shape(const QString& label, const QColor& line_color,
@@ -295,3 +296,4 @@ QPointF& Shape::operator[](int i) {
   return points[i];
 }
 size_t Shape::size() { return points.size(); }
+};  // namespace lmp

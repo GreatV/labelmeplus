@@ -7,7 +7,7 @@
 
 class ScrollAreaPreview : public QScrollArea {
  public:
-  ScrollAreaPreview(QWidget* parent = nullptr);
+  explicit ScrollAreaPreview(QWidget* parent = nullptr);
   QLabel* label{};
   void setText(const QString& text);
   void setPixmap(const QPixmap& pixmap);
@@ -17,10 +17,10 @@ class ScrollAreaPreview : public QScrollArea {
 class FileDialogPreview : public QFileDialog {
   Q_OBJECT
  public:
-  FileDialogPreview(QWidget* parent = nullptr,
-                    const QString& caption = QString(),
-                    const QString& directory = QString(),
-                    const QString& filter = QString());
+  explicit FileDialogPreview(QWidget* parent = nullptr,
+                             const QString& caption = QString(),
+                             const QString& directory = QString(),
+                             const QString& filter = QString());
   ScrollAreaPreview* labelPreview{};
  private slots:
   void onChange(const QString& path);

@@ -2,32 +2,38 @@
 #define LABEL_FILE_H
 
 #include <QString>
-#include <nlohmann/json.hpp>
+#include <any>
+#include <exception>
 #include <opencv2/opencv.hpp>
-#include <vector>
+
+class LabelFileError : public std::exception {};
 
 class LabelFile {
  public:
-  explicit LabelFile(const QString& filename);
-  void save(const std::string& filename,
-            const std::vector<std::map<std::string, std::any>>& shapes,
-            const std::string& imagePath, int imageHeight, int imageWidth,
-            const std::string& imageData,
-            const std::vector<std::map<std::string, std::any>>& otherData,
-            const std::vector<std::map<std::string, bool>>& flags);
-  static bool is_label_file(const std::string& filename);
+  explicit LabelFile(const QString& filepath = {});
+  static cv::Mat load_image_file(const QString& filepath);
+  void save(const QString& filepath,
+            const std::vector<std::map<std::string, std::any>>& shape_info_list,
+            const QString& image_path, int image_height, int image_width,
+            const cv::Mat& image_data = {},
+            const std::map<std::string, std::any>& other_data = {},
+            const std::map<std::string, bool>& flag_list = {});
+
+  static bool is_label_file(const QString& filepath);
+
+ public:
+  inline static const char* suffix = ".json";
+  QString imagePath{};
+  cv::Mat imageData{};
+  QString filename{};
+  std::map<std::string, bool> flags{};
+  std::map<std::string, std::any> otherData{};
+  std::vector<std::map<std::string, std::any>> shapes{};
 
  private:
-  std::string flags_;
-  std::vector<QString> shapes;
-  QString imagePath;
-  QString imageData;
-  QString filename_;
-  cv::Mat load_image_file(const std::string& filename);
-  void load(const QString& filename);
-  std::tuple<int, int> check_image_height_and_width(const cv::Mat& image_data,
-                                                    int image_height,
-                                                    int image_width);
+  void load(const QString& filepath);
+  static std::tuple<int, int> check_image_height_and_width(const cv::Mat& image,
+                                                           int image_height,
+                                                           int image_width);
 };
-
-#endif  // LABEL_FILE_H
+#endif

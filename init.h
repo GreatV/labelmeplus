@@ -1,9 +1,9 @@
 #ifndef INIT_H
 #define INIT_H
 
-#include <string>
+#include <QString>
 
-inline std::string __appname__{"labelmeplus"};
+inline QString __appname__{"labelmeplus"};
 
 /* Semantic Versioning 2.0.0: https://semver.org/
  * 1. MAJOR version when you make incompatible API changes;
@@ -12,4 +12,4 @@ inline std::string __appname__{"labelmeplus"};
  */
 inline std::string __version__{"5.1.1"};
 
-#endif // INIT_H
+#endif  // INIT_H
