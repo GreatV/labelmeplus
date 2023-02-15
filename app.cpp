@@ -2,7 +2,6 @@
 
 #include <fmt/format.h>
 #include <glog/logging.h>
-#include <widgets/file_dialog_preview.h>
 
 #include <QApplication>
 #include <QCollator>
@@ -25,6 +24,7 @@
 #include "shape.h"
 #include "utils/utils.h"
 #include "widgets/brightness_contrast_dialog.h"
+#include "widgets/file_dialog_preview.h"
 #include "widgets/tool_bar.h"
 
 // const auto& LABEL_COLORMAP = imgviz::getLabelColor(255);
@@ -265,10 +265,12 @@ app::app(const YAML::Node& config, const QString& filename,
   QObject::connect(this->flag_widget_, SIGNAL(itemChanged(QListWidgetItem*)),
                    this, SLOT(setDirty()));
 
-  QObject::connect(this->labelList_,
-                   SIGNAL(itemSelectionChanged(QList<QStandardItem*>,
-                                               QList<QStandardItem*>)),
-                   this, SLOT(labelSelectionChanged()));
+  // clang-format off
+  QObject::connect(
+      this->labelList_,
+      SIGNAL(itemSelectionChanged(QList<QStandardItem*>,QList<QStandardItem*>)),
+      this, SLOT(labelSelectionChanged()));
+  // clang-format on
   QObject::connect(this->labelList_,
                    SIGNAL(itemDoubleClicked(LabelListWidgetItem*)), this,
                    SLOT(editLabel(LabelListWidgetItem*)));
@@ -343,8 +345,12 @@ app::app(const YAML::Node& config, const QString& filename,
   }
 
   canvas_ = new Canvas(epsilon, double_click, num_backups, crosshair);
-  QObject::connect(canvas_, SIGNAL(zoomRequest(int, QPointF)), this,
-                   SLOT(zoomRequest(int, QPointF)));
+  // clang-format off
+  QObject::connect(canvas_,
+                   SIGNAL(zoomRequest(int,QPointF)),
+                   this,
+                   SLOT(zoomRequest(int,QPointF)));
+  // clang-format on
 
   scrollArea_ = new QScrollArea();
   scrollArea_->setWidget(canvas_);
@@ -352,8 +358,12 @@ app::app(const YAML::Node& config, const QString& filename,
   scrollBars_ = {{Qt::Vertical, scrollArea_->verticalScrollBar()},
                  {Qt::Horizontal, scrollArea_->horizontalScrollBar()}};
 
-  QObject::connect(canvas_, SIGNAL(scrollRequest(int, int)), this,
-                   SLOT(scrollRequest(int, int)));
+  // clang-format off
+  QObject::connect(canvas_,
+                   SIGNAL(scrollRequest(int,int)),
+                   this,
+                   SLOT(scrollRequest(int,int)));
+  // clang-format on
 
   QObject::connect(canvas_, SIGNAL(newShape()), this, SLOT(newShape()));
   QObject::connect(canvas_, SIGNAL(shapedMove()), this, SLOT(setDirty()));
@@ -603,7 +613,6 @@ app::app(const YAML::Node& config, const QString& filename,
   shortcut = {};
   show_all_action_ = newAction(this, tr("&Show\nPolygons"), shortcut, "eye",
                                tr("Show all polygons"), false, false);
-  auto show_all = [this]() { this->togglePolygons(true); };
   QObject::connect(show_all_action_, SIGNAL(triggered(bool)), this,
                    SLOT(onShowAllTriggered()));
 
@@ -932,7 +941,7 @@ void app::setDirty() {
   save_action_->setEnabled(true);
   auto title = __appname__;
   if (!filename_.isEmpty()) {
-    title = QString("%1 - %2").arg(title).arg(filename_);
+    title = QString("%1 - %2").arg(title, filename_);
   }
   this->setWindowTitle(title);
 }
@@ -948,7 +957,7 @@ void app::setClean() {
   create_linestrip_mode_action_->setEnabled(true);
   auto title = __appname__;
   if (!filename_.isEmpty()) {
-    title = QString("%1 - %2").arg(title).arg(filename_);
+    title = QString("%1 - %2").arg(title, filename_);
   }
   this->setWindowTitle(title);
 
@@ -1191,8 +1200,7 @@ void app::editLabel(LabelListWidgetItem* item) {
     }
     errorMessage(tr("Invalid label"),
                  QString(tr("Invalid label %1 with validation type %2"))
-                     .arg(text)
-                     .arg(validate_label));
+                     .arg(text, validate_label));
 
     return;
   }
@@ -1577,8 +1585,7 @@ void app::newShape() {
 
     errorMessage(tr("Invalid label"),
                  QString(tr("Invalid label %1 with validation type `%2`"))
-                     .arg(text)
-                     .arg(QString::fromStdString(validate_label)));
+                     .arg(text, QString::fromStdString(validate_label)));
 
     text = "";
   }
@@ -1725,8 +1732,7 @@ bool app::loadFile(QString filename) {
           tr("Error opening file"),
           QString(tr("<p><b>%1</b></p>"
                      "<p>Make sure <i>%2</i> is a valid label file.</p>"))
-              .arg(e.what())
-              .arg(label_file));
+              .arg(e.what(), label_file));
 
       this->status(QString(tr("Error reading %1")).arg(label_file));
       return false;
@@ -1769,7 +1775,7 @@ bool app::loadFile(QString filename) {
   }
   canvas_->loadPixmap(QPixmap::fromImage(image));
   std::map<std::string, bool> flags;
-  for (auto item : config_["flags"]) {
+  for (const auto& item : config_["flags"]) {
     auto k = item.as<std::string>();
     flags[k] = false;
   }
@@ -2085,9 +2091,9 @@ void app::changeOutputDirDialog(const bool _value) {
 
   output_dir_ = output_dir;
 
-  this->statusBar()->showMessage(tr("%1 Annotations will be saved/loaded in %2")
-                                     .arg("Change Annotations Dir")
-                                     .arg(output_dir_));
+  this->statusBar()->showMessage(
+      tr("%1 Annotations will be saved/loaded in %2")
+          .arg("Change Annotations Dir", output_dir_));
   this->statusBar()->show();
 
   auto current_filename = filename_;
@@ -2188,6 +2194,7 @@ void app::deleteFile() {
          "proceed anyway?");
   auto answer = mb->warning(this, tr("Attention"), msg,
                             QMessageBox::Yes | QMessageBox::No);
+  delete mb;
   if (answer != QMessageBox::Yes) {
     return;
   }
@@ -2233,6 +2240,7 @@ bool app::mayContinue() {
       this, tr("Save annotations?"), msg,
       QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
       QMessageBox::Save);
+  delete mb;
   if (answer == QMessageBox::Discard) {
     return true;
   } else if (answer == QMessageBox::Save) {
