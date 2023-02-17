@@ -86,16 +86,11 @@ bool StandardItemModel::removeRows(int row, int count,
   return ret;
 }
 
-LabelListWidgetItem *StandardItemModel::itemFromIndex(
-    const QModelIndex &index) const {
-  return new LabelListWidgetItem();
-}
-
 LabelListWidget::LabelListWidget() {
   this->setWindowFlags(Qt::Window);
-  auto *model = new StandardItemModel();
-  model->setItemPrototype(new LabelListWidgetItem());
-  this->setModel(model);
+  model_ = new StandardItemModel();
+  model_->setItemPrototype(new LabelListWidgetItem());
+  this->setModel(model_);
   //    this->setModel(new StandardItemModel());
   //    this->model()->setItemPrototype(new LabelListWidgetItem());
   this->setItemDelegate(new HTMLDelegate());
@@ -104,11 +99,12 @@ LabelListWidget::LabelListWidget() {
 
   QObject::connect(this, SIGNAL(doubleClicked(QModelIndex)), this,
                    SLOT(itemDoubleClickedEvent(QModelIndex)));
-
+  // clang-format off
   QObject::connect(
       this->selectionModel(),
-      SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-      SLOT(itemSelectionChangedEvent(QItemSelection, QItemSelection)));
+      SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this,
+      SLOT(itemSelectionChangedEvent(QItemSelection,QItemSelection)));
+  // clang-format on
 }
 
 void LabelListWidget::itemSelectionChangedEvent(
@@ -154,7 +150,7 @@ void LabelListWidget::addItem(QStandardItem *item) {
 
 void LabelListWidget::removeItem(QStandardItem *item) {
   auto index = this->model()->indexFromItem(item);
-  this->model()->removeRows(index.row(), 1);
+  this->model()->removeRows(index.row(), 1, QModelIndex());
 }
 
 void LabelListWidget::selectItem(QStandardItem *item) {
@@ -164,8 +160,7 @@ void LabelListWidget::selectItem(QStandardItem *item) {
 
 LabelListWidgetItem *LabelListWidget::findItemByShape(lmp::Shape *shape) {
   for (auto row = 0; row < this->model()->rowCount(); ++row) {
-    LabelListWidgetItem *item =
-        (LabelListWidgetItem *)this->model()->item(row, 0);
+    auto *item = (LabelListWidgetItem *)this->model()->item(row, 0);
     if (item->shape() == shape) {
       return item;
     }

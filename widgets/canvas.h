@@ -44,6 +44,8 @@ class Canvas : public QWidget {
   unsigned char CREATE = 0;
   unsigned char EDIT = 1;
 
+  int setcursor_count_ = 0;
+
   /* Menus:
    * 0: right-click without selection and dragging of shapes
    * 1: right-click with selection and dragging of shapes
@@ -112,7 +114,7 @@ class Canvas : public QWidget {
   bool endMove(bool copy);
 
  private:
-  static void restoreCursor();
+  void restoreCursor();
   void unHighlight();
 
   void setHiding(bool enable = true);

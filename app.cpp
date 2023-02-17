@@ -1705,7 +1705,7 @@ bool app::loadFile(QString filename) {
   resetState();
   canvas_->setEnabled(false);
 
-  if (!filename.isEmpty()) {
+  if (filename.isEmpty()) {
     filename = settings_->value("filename", "").toString();
   }
   if (!QFile::exists(filename)) {

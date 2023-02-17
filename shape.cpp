@@ -42,9 +42,9 @@ Shape::Shape(const QString& label, const QColor& line_color,
 }
 QString Shape::shape_type() { return shape_type_; }
 void Shape::shape_type(const QString value) {
-  if (std::find(valid_shape.begin(), valid_shape.end(), value) !=
+  if (std::find(valid_shape.begin(), valid_shape.end(), value) ==
       valid_shape.end()) {
-    throw fmt::format("Unexpected shape_type: {1}", value.toStdString());
+    throw fmt::format("Unexpected shape_type: {}", value.toStdString());
   }
   shape_type_ = value;
 }

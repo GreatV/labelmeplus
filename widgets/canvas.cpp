@@ -46,6 +46,8 @@ Canvas::Canvas(const double epsilon, QString double_click,
    */
   line_ = new Shape();
 
+  painter_ = new QPainter();
+
   menus[0] = new QMenu();
   menus[1] = new QMenu();
 
@@ -130,9 +132,16 @@ void Canvas::focusOutEvent(QFocusEvent *event) { restoreCursor(); }
 void Canvas::overrideCursor(const QCursor &cursor) {
   restoreCursor();
   cursor_ = cursor;
-  QApplication::setOverrideCursor(cursor);
+  setcursor_count_ += 1;
+  QGuiApplication::setOverrideCursor(cursor);
 }
-void Canvas::restoreCursor() { QApplication::restoreOverrideCursor(); }
+void Canvas::restoreCursor() {
+  if (setcursor_count_ == 0) {
+    return;
+  }
+  setcursor_count_ -= 1;
+  QGuiApplication::restoreOverrideCursor();
+}
 void Canvas::unHighlight() {
   if (hShape_ != nullptr) {
     hShape_->highlightClear();
@@ -193,7 +202,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
   if (drawing()) {
     line_->shape_type(createMode());
 
-    overrideCursor(CURSOR_DRAW);
+    overrideCursor(QCursor(CURSOR_DRAW));
     if (current_ == nullptr) {
       repaint();  // draw crosshair
       return;
@@ -212,7 +221,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
        * color rise to alert the user.
        */
       pos = (*current_)[0];
-      overrideCursor(CURSOR_POINT);
+      overrideCursor(QCursor(CURSOR_POINT));
       current_->highlightVertex(0, Shape::NEAR_VERTEX);
     }
 
@@ -249,7 +258,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
   // Polygon copy moving.
   if (Qt::RightButton & event->buttons()) {
     if (!selectedShapesCopy_.empty() && prevPoint_.isNull()) {
-      overrideCursor(CURSOR_MOVE);
+      overrideCursor(QCursor(CURSOR_MOVE));
       boundedMoveShapes(selectedShapesCopy_, pos);
       this->repaint();
     } else if (!selectedShapes_.empty()) {
@@ -269,7 +278,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
       this->repaint();
       movingShape_ = true;
     } else if (!selectedShapes_.empty() && !prevPoint_.isNull()) {
-      overrideCursor(CURSOR_MOVE);
+      overrideCursor(QCursor(CURSOR_MOVE));
       boundedMoveShapes(selectedShapes_, pos);
       this->repaint();
       movingShape_ = true;
@@ -306,7 +315,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
       prevEdge_ = hEdge_;
       hEdge_ = -1;
       shape->highlightVertex(index, Shape::MOVE_VERTEX);
-      overrideCursor(CURSOR_POINT);
+      overrideCursor(QCursor(CURSOR_POINT));
       this->setToolTip(tr("click & drag to move point"));
       this->setStatusTip(this->toolTip());
       this->update();
@@ -319,7 +328,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
       hVertex_ = -1;
       prevShape_ = hShape_ = shape;
       prevEdge_ = hEdge_ = index_edge;
-      overrideCursor(CURSOR_POINT);
+      overrideCursor(QCursor(CURSOR_POINT));
       this->setToolTip(tr("click to create point"));
       this->setStatusTip(this->toolTip());
       this->update();
@@ -337,7 +346,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
                              shape->label_.toStdString());
       this->setToolTip(tr(tip.c_str()));
       this->setStatusTip(this->toolTip());
-      overrideCursor(CURSOR_GRAB);
+      overrideCursor(QCursor(CURSOR_GRAB));
       this->update();
       break;
     } else {
@@ -498,7 +507,7 @@ void Canvas::paintEvent(QPaintEvent *event) {
       shape->paint(p);
     }
   }
-  if (fillDrawing() && createMode_ == "polygon" &&
+  if (fillDrawing() && createMode_ == "polygon" && current_ != nullptr &&
       current_->points.size() >= 2) {
     auto drawing_shape = current_;
     drawing_shape->addPoint((*line_)[1]);
