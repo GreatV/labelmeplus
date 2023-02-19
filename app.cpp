@@ -27,8 +27,6 @@
 #include "widgets/file_dialog_preview.h"
 #include "widgets/tool_bar.h"
 
-// const auto& LABEL_COLORMAP = imgviz::getLabelColor(255);
-
 static void qimage_to_mat(const QImage& image, cv::OutputArray out) {
   switch (image.format()) {
     case QImage::Format_Invalid: {
@@ -179,26 +177,25 @@ app::app(const YAML::Node& config, const QString& filename,
   }
   config_ = _config;
 
-  //  // set default shape colors
-  //  Shape shape;
-  //  auto color = config_["shape"]["line_color"];
-  //  shape.line_color = getYamlColor(color);
-  //  color = config_["shape"]["fill_color"];
-  //  shape.fill_color = getYamlColor(color);
-  //  color = config_["shape"]["select_line_color"];
-  //  shape.select_line_color = getYamlColor(color);
-  //  color = config_["shape"]["select_fill_color"];
-  //  shape.select_fill_color = getYamlColor(color);
-  //  color = config_["shape"]["vertex_fill_color"];
-  //  shape.vertex_fill_color = getYamlColor(color);
-  //  color = config_["shape"]["hvertex_fill_color"];
-  //  shape.hvertex_fill_color = getYamlColor(color);
+  // set default shape colors
+  auto color = config_["shape"]["line_color"];
+  Shape::line_color = getYamlColor(color);
+  color = config_["shape"]["fill_color"];
+  Shape::fill_color = getYamlColor(color);
+  color = config_["shape"]["select_line_color"];
+  Shape::select_line_color = getYamlColor(color);
+  color = config_["shape"]["select_fill_color"];
+  Shape::select_fill_color = getYamlColor(color);
+  color = config_["shape"]["vertex_fill_color"];
+  Shape::vertex_fill_color = getYamlColor(color);
+  color = config_["shape"]["hvertex_fill_color"];
+  Shape::hvertex_fill_color = getYamlColor(color);
 
-  //  // set point size from config file
-  //  auto point_size = config_["shape"]["point_size"];
-  //  if (point_size.Type() == YAML::NodeType::Scalar) {
-  //    shape.point_size = point_size.as<int>();
-  //  }
+  // set point size from config file
+  auto point_size = config_["shape"]["point_size"];
+  if (point_size.Type() == YAML::NodeType::Scalar) {
+    Shape::point_size = point_size.as<int>();
+  }
 
   this->setWindowTitle(__appname__);
 

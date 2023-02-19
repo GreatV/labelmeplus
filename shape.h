@@ -33,14 +33,15 @@ class Shape {
   inline static const char NEAR_VERTEX = 1;
 
   // The following class variables influence the drawing of all shape objects.
-  QColor line_color = DEFAULT_LINE_COLOR;
-  QColor fill_color = DEFAULT_FILL_COLOR;
-  QColor select_line_color = DEFAULT_SELECT_LINE_COLOR;
-  QColor select_fill_color = DEFAULT_SELECT_FILL_COLOR;
-  QColor vertex_fill_color = DEFAULT_VERTEX_FILL_COLOR;
-  QColor hvertex_fill_color = DEFAULT_HVERTEX_FILL_COLOR;
+  static inline QColor line_color = DEFAULT_LINE_COLOR;
+  static inline QColor fill_color = DEFAULT_FILL_COLOR;
+  static inline QColor select_line_color = DEFAULT_SELECT_LINE_COLOR;
+  static inline QColor select_fill_color = DEFAULT_SELECT_FILL_COLOR;
+  static inline QColor vertex_fill_color = DEFAULT_VERTEX_FILL_COLOR;
+  static inline QColor hvertex_fill_color = DEFAULT_HVERTEX_FILL_COLOR;
+
   char point_type = P_ROUND;
-  int point_size = 8;
+  static inline int point_size = 8;
   double scale = 1.0;
 
  public:
