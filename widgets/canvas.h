@@ -24,16 +24,17 @@ static Qt::CursorShape CURSOR_GRAB = Qt::OpenHandCursor;
 class Canvas : public QWidget {
   Q_OBJECT
  public:
-  explicit Canvas(double epsilon = 10.0, QString double_click = "close",
-                  int num_backups = 10,
-                  std::map<std::string, bool> crosshair = {{"polygon", false},
-                                                           {"rectangle", true},
-                                                           {"circle", false},
-                                                           {"line", false},
-                                                           {"point", false},
-                                                           {"linestrip",
-                                                            false}},
-                  QWidget* parent = nullptr);
+  explicit Canvas(
+      double epsilon = 10.0, const QString& double_click = "close",
+      int num_backups = 10,
+      const std::map<std::string, bool>& crosshair = {{"polygon", false},
+                                                      {"rectangle", true},
+                                                      {"circle", false},
+                                                      {"line", false},
+                                                      {"point", false},
+                                                      {"linestrip", false}},
+      QWidget* parent = nullptr);
+  ~Canvas();
   QList<Shape*> selectedShapes_;
   QList<Shape*> shapes_;
   std::vector<QList<Shape*>> shapesBackups_;

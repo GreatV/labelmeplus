@@ -18,14 +18,14 @@ std::vector<QString> createModeMultiPoints{
 
 std::vector<QString> createMode2Points{"rectangle", "circle", "line"};
 
-Canvas::Canvas(const double epsilon, QString double_click,
-               const int num_backups, std::map<std::string, bool> crosshair,
-               QWidget *parent)
-    : epsilon_(epsilon),
+Canvas::Canvas(const double epsilon, const QString &double_click,
+               const int num_backups,
+               const std::map<std::string, bool> &crosshair, QWidget *parent)
+    : QWidget(parent),
+      epsilon_(epsilon),
       double_click_(std::move(double_click)),
       num_backups_(num_backups),
-      crosshair_(std::move(crosshair)),
-      QWidget(parent) {
+      crosshair_(std::move(crosshair)) {
   if (!(double_click_.isEmpty() || double_click_ == "close")) {
     LOG(ERROR) << fmt::format("Unexpected value for double_click event: {1}",
                               double_click_.toStdString());
@@ -37,6 +37,10 @@ Canvas::Canvas(const double epsilon, QString double_click,
   current_ = nullptr;
   selectedShapes_.clear();
   selectedShapesCopy_.clear();
+
+  hShape_ = nullptr;
+  painter_ = nullptr;
+  prevShape_ = nullptr;
 
   /* line_ represents:
    *     - createMode == "polygon": edge from last point to current
@@ -54,6 +58,54 @@ Canvas::Canvas(const double epsilon, QString double_click,
   // set widget options
   this->setMouseTracking(true);
   this->setFocusPolicy(Qt::WheelFocus);
+}
+
+Canvas::~Canvas() {
+  for (auto &shape : selectedShapes_) {
+    if (shape != nullptr) {
+      delete shape;
+    }
+  }
+
+  for (auto &shape : shapes_) {
+    if (shape != nullptr) {
+      delete shape;
+    }
+  }
+
+  for (auto &shapes : shapesBackups_) {
+    for (auto &shape : shapes) {
+      if (shape != nullptr) {
+        delete shape;
+      }
+    }
+  }
+
+  if (hShape_ != nullptr) {
+    delete hShape_;
+  }
+
+  if (current_ != nullptr) {
+    delete current_;
+  }
+
+  for (auto &shape : selectedShapesCopy_) {
+    if (shape != nullptr) {
+      delete shape;
+    }
+  }
+
+  if (line_ != nullptr) {
+    delete line_;
+  }
+
+  if (painter_ != nullptr) {
+    delete painter_;
+  }
+
+  if (prevShape_ != nullptr) {
+    delete prevShape_;
+  }
 }
 bool Canvas::fillDrawing() { return fill_drawing_; }
 void Canvas::setFillDrawing(bool value) { fill_drawing_ = value; }

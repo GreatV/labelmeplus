@@ -3,7 +3,6 @@
 #define IMGVIZ_IMGVIZ_H_
 
 #include <cmath>
-
 #include <opencv2/opencv.hpp>
 
 namespace imgviz {
@@ -17,30 +16,30 @@ inline std::string typeToStr(int type) {
   unsigned chans = 1 + (type >> CV_CN_SHIFT);
 
   switch (depth) {
-  case CV_8U:
-    r = "8U";
-    break;
-  case CV_8S:
-    r = "8S";
-    break;
-  case CV_16U:
-    r = "16U";
-    break;
-  case CV_16S:
-    r = "16S";
-    break;
-  case CV_32S:
-    r = "32S";
-    break;
-  case CV_32F:
-    r = "32F";
-    break;
-  case CV_64F:
-    r = "64F";
-    break;
-  default:
-    r = "User";
-    break;
+    case CV_8U:
+      r = "8U";
+      break;
+    case CV_8S:
+      r = "8S";
+      break;
+    case CV_16U:
+      r = "16U";
+      break;
+    case CV_16S:
+      r = "16S";
+      break;
+    case CV_32S:
+      r = "32S";
+      break;
+    case CV_32F:
+      r = "32F";
+      break;
+    case CV_64F:
+      r = "64F";
+      break;
+    default:
+      r = "User";
+      break;
   }
 
   r += "C";
@@ -128,8 +127,9 @@ inline cv::Vec2i getTileShape(unsigned size, double hw_ratio = 1) {
 }
 
 inline cv::Mat tile(const std::vector<cv::Mat> images,
-             cv::Vec2i shape = cv::Vec2i(0, 0), const unsigned border_width = 5,
-             const cv::Scalar border_color = cv::Scalar(255, 255, 255)) {
+                    cv::Vec2i shape = cv::Vec2i(0, 0),
+                    const unsigned border_width = 5,
+                    const cv::Scalar border_color = cv::Scalar(255, 255, 255)) {
   auto height = images[0].rows;
   auto width = images[0].cols;
   for (size_t i = 1; i < images.size(); i++) {
@@ -142,9 +142,9 @@ inline cv::Mat tile(const std::vector<cv::Mat> images,
   }
 
   if (shape[0] * shape[1] == 0) {
-    shape = getTileShape(/*size=*/static_cast<unsigned int>(images.size()),
-                         /*hw_ratio=*/static_cast<double>(height) /
-                             static_cast<double>(width));
+    shape = getTileShape(
+        /*size=*/static_cast<unsigned int>(images.size()),
+        /*hw_ratio=*/static_cast<double>(height) / static_cast<double>(width));
   }
   auto rows = shape[0];
   auto cols = shape[1];
@@ -195,10 +195,11 @@ inline cv::Mat tile(const std::vector<cv::Mat> images,
 }
 
 inline cv::Mat textInRectangle(const cv::Mat src, const std::string text,
-                        const std::string loc = "lt+",
-                        const int font_face = cv::FONT_HERSHEY_SIMPLEX,
-                        const double font_scale = 1, const int thickness = 2) {
-  assert(loc == "lt+"); // TODO(wkentaro): support other loc
+                               const std::string loc = "lt+",
+                               const int font_face = cv::FONT_HERSHEY_SIMPLEX,
+                               const double font_scale = 1,
+                               const int thickness = 2) {
+  assert(loc == "lt+");  // TODO(wkentaro): support other loc
 
   cv::Mat dst = src.clone();
   if (dst.type() == CV_8UC1) {
@@ -248,7 +249,7 @@ inline cv::Vec3b getLabelColor(const uint8_t label) {
 }
 
 inline cv::Mat labelToBgr(const cv::Mat label, const cv::Mat bgr,
-                   const double alpha = 0.5) {
+                          const double alpha = 0.5) {
   cv::Mat bgr_ = bgr.clone();
   if (bgr.type() == CV_8UC1) {
     cv::cvtColor(bgr, bgr_, cv::COLOR_GRAY2BGR);
@@ -262,7 +263,8 @@ inline cv::Mat labelToBgr(const cv::Mat label, const cv::Mat bgr,
   for (size_t j = 0; j < label.rows; j++) {
     for (size_t i = 0; i < label.cols; i++) {
       cv::Vec3b bgr_color = bgr_.at<cv::Vec3b>((int)j, (int)i);
-      cv::Vec3b label_color = getLabelColor(label.at<int32_t>((int)j, (int)i) % 256);
+      cv::Vec3b label_color =
+          getLabelColor(label.at<int32_t>((int)j, (int)i) % 256);
       label_bgr.at<cv::Vec3b>((int)j, (int)i) =
           alpha * label_color + (1 - alpha) * bgr_color;
     }
@@ -270,6 +272,6 @@ inline cv::Mat labelToBgr(const cv::Mat label, const cv::Mat bgr,
   return label_bgr;
 }
 
-} // namespace imgviz
+}  // namespace imgviz
 
 #endif /* IMGVIZ_IMGVIZ_H_ */
