@@ -42,7 +42,8 @@ FileDialogPreview::FileDialogPreview(QWidget *parent, const QString &caption,
   box->addStretch();
 
   this->setFixedSize(this->width() + 300, this->height());
-  //    this->setLayout(box);
+  auto layout = (QGridLayout *)this->layout();
+  layout->addLayout(box, 1, 3, 1, 1);
   QObject::connect(this, SIGNAL(currentChanged(QString)), this,
                    SLOT(onChange(QString)));
 }
