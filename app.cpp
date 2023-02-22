@@ -817,7 +817,31 @@ app::app(const YAML::Node& config, const QString& filename,
   QList<QAction*> copy_move_actions{copy_here_action_, move_here_action_};
   ::addActions(canvas_->menus[1], copy_move_actions);
 
-  tools_ = toolbar("Tools");
+  tools_ = nullptr;
+  toolbar(tools_, "Tools");
+  tool_ = {
+      open_action_,
+      opendir_action_,
+      open_next_img_action_,
+      open_prev_img_action_,
+      save_action_,
+      delete_file_action_,
+      nullptr,
+      create_mode_action_,
+      edit_mode_action_,
+      duplicate_action_,
+      copy_action_,
+      paste_action_,
+      delete_mode_action_,
+      undo_action_,
+      brightnessContrast_action_,
+      nullptr,
+      // zoom_action_,
+      fitWidth_action_,
+  };
+
+  ::addActions(tools_, tool_);
+
   this->statusBar()->showMessage(QString(tr("%1 Started.")).arg(__appname__));
   this->statusBar()->show();
 
@@ -887,32 +911,32 @@ QMenu* app::menu(const QString& title, const QList<QAction*>& actions) {
   return menu;
 }
 
-ToolBar* app::toolbar(const QString& title, const QList<QAction*>& actions) {
-  auto* toolbar = new ToolBar(title);
+void app::toolbar(ToolBar* toolbar, const QString& title,
+                  const QList<QAction*>& actions) {
+  toolbar = new ToolBar(title);
   toolbar->setObjectName(QString("%1 - ToolBar").arg(title));
   toolbar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   if (!actions.empty()) {
     ::addActions(toolbar, actions);
   }
   this->addToolBar(Qt::LeftToolBarArea, toolbar);
-  return toolbar;
 }
 
 bool app::noShapes() { return labelList_->model()->rowCount() != 0; }
 
 void app::populateModeActions() {
-  tools_->clear();
-  ::addActions(tools_, tool_);
-  canvas_->menus[0]->clear();
-  ::addActions(canvas_->menus[0], menu_);
-  edit_menu_->clear();
-  QList<QAction*> actions{
-      create_mode_action_,        create_rectangle_mode_action_,
-      create_circle_mode_action_, create_line_mode_action_,
-      create_point_mode_action_,  create_linestrip_mode_action_,
-      edit_mode_action_};
-  actions = actions + edit_menu_actions_;
-  ::addActions(edit_menu_, actions);
+  //  tools_->clear();
+  //  ::addActions(tools_, tool_);
+  //  canvas_->menus[0]->clear();
+  //  ::addActions(canvas_->menus[0], menu_);
+  //  edit_menu_->clear();
+  //  QList<QAction*> actions{
+  //      create_mode_action_,        create_rectangle_mode_action_,
+  //      create_circle_mode_action_, create_line_mode_action_,
+  //      create_point_mode_action_,  create_linestrip_mode_action_,
+  //      edit_mode_action_};
+  //  actions = actions + edit_menu_actions_;
+  //  ::addActions(edit_menu_, actions);
 }
 
 // Even if we auto-save the file, we keep the ability to undo.
