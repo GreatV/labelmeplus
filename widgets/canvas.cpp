@@ -73,13 +73,13 @@ Canvas::~Canvas() {
     }
   }
 
-  for (auto &shapes : shapesBackups_) {
-    for (auto &shape : shapes) {
-      if (shape != nullptr) {
-        delete shape;
-      }
-    }
-  }
+  //  for (auto &shapes : shapesBackups_) {
+  //    for (auto &shape : shapes) {
+  //      if (shape != nullptr) {
+  //        delete shape;
+  //      }
+  //    }
+  //  }
 
   if (hShape_ != nullptr) {
     delete hShape_;

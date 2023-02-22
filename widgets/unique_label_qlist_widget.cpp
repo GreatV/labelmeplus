@@ -41,11 +41,11 @@ void UniqueLabelQListWidget::setItemLabel(QListWidgetItem* item,
   if (color.empty() || color.size() < 3) {
     q_label->setText(QString("%1").arg(label));
   } else {
-    q_label->setText(QString("%1 <font color=\"#%2%3%4\">·</font>")
+    q_label->setText(QString("%1 <font color=\"#%2%3%4\">●</font>")
                          .arg(label.toHtmlEscaped())
-                         .arg(color[0])
-                         .arg(color[1])
-                         .arg(color[2]));
+                         .arg(color[0], 2, 16, QLatin1Char('0'))
+                         .arg(color[1], 2, 16, QLatin1Char('0'))
+                         .arg(color[2], 2, 16, QLatin1Char('0')));
   }
   q_label->setAlignment(Qt::AlignBottom);
   item->setSizeHint(q_label->sizeHint());

@@ -290,7 +290,7 @@ QPointF Shape::operator[](int i) const {
 }
 QPointF& Shape::operator[](int i) {
   if (i < 0) {
-    return *(points.end() - i);
+    return *(points.end() + i);
   }
 
   return points[i];

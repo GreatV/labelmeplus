@@ -838,7 +838,7 @@ app::app(const YAML::Node& config, const QString& filename,
     filename_ = filename;
   }
 
-  if (config_["file_search"]) {
+  if (config_["file_search"] && !config_["file_search"].IsNull()) {
     auto file_search = config_["file_search"].as<std::string>();
     fileSearch_->setText(QString::fromStdString(file_search));
     fileSearchChanged();
@@ -1213,9 +1213,9 @@ void app::editLabel(LabelListWidgetItem* item) {
     auto label_html_escaped = shape->label_.toHtmlEscaped();
     auto content = QString("%1 <font color=\"#%2%3%4\">•</font>")
                        .arg(label_html_escaped)
-                       .arg(r, 2, 16)
-                       .arg(g, 2, 16)
-                       .arg(b, 2, 16);
+                       .arg(r, 2, 16, QLatin1Char('0'))
+                       .arg(g, 2, 16, QLatin1Char('0'))
+                       .arg(b, 2, 16, QLatin1Char('0'));
     item->setText(content);
   } else {
     auto content = QString("%1 (%2)").arg(shape->label_).arg(shape->group_id_);
@@ -1305,9 +1305,9 @@ void app::addLabel(Shape* shape) {
   auto label_html_escaped = shape->label_.toHtmlEscaped();
   auto content = QString("%1 <font color=\"#%2%3%4\">•</font>")
                      .arg(label_html_escaped)
-                     .arg(r, 2, 16)
-                     .arg(g, 2, 16)
-                     .arg(b, 2, 16);
+                     .arg(r, 2, 16, QLatin1Char('0'))
+                     .arg(g, 2, 16, QLatin1Char('0'))
+                     .arg(b, 2, 16, QLatin1Char('0'));
   label_list_item->setText(content);
 }
 

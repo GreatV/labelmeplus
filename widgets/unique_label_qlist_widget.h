@@ -12,7 +12,7 @@ class UniqueLabelQListWidget : public EscapableQListWidget {
  public:
   QListWidgetItem* createItemFromLabel(const QString& label);
   void setItemLabel(QListWidgetItem* item, const QString& label,
-                    const std::vector<int>& color);
+                    const std::vector<int>& color = {});
   QListWidgetItem* findItemByLabel(const QString& label);
 };
 
