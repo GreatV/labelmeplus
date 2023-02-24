@@ -817,8 +817,7 @@ app::app(const YAML::Node& config, const QString& filename,
   QList<QAction*> copy_move_actions{copy_here_action_, move_here_action_};
   ::addActions(canvas_->menus[1], copy_move_actions);
 
-  tools_ = nullptr;
-  toolbar(tools_, "Tools");
+  tools_ = toolbar("Tools");
   tool_ = {
       open_action_,
       opendir_action_,
@@ -911,15 +910,15 @@ QMenu* app::menu(const QString& title, const QList<QAction*>& actions) {
   return menu;
 }
 
-void app::toolbar(ToolBar* toolbar, const QString& title,
-                  const QList<QAction*>& actions) {
-  toolbar = new ToolBar(title);
+ToolBar* app::toolbar(const QString& title, const QList<QAction*>& actions) {
+  auto* toolbar = new ToolBar(title);
   toolbar->setObjectName(QString("%1 - ToolBar").arg(title));
   toolbar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   if (!actions.empty()) {
     ::addActions(toolbar, actions);
   }
   this->addToolBar(Qt::LeftToolBarArea, toolbar);
+  return toolbar;
 }
 
 bool app::noShapes() { return labelList_->model()->rowCount() != 0; }

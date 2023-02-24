@@ -129,8 +129,7 @@ class app : public QMainWindow {
 
  private:
   QMenu* menu(const QString& title, const QList<QAction*>& actions = {});
-  void toolbar(ToolBar* toolbar, const QString& title,
-               const QList<QAction*>& actions = {});
+  ToolBar* toolbar(const QString& title, const QList<QAction*>& actions = {});
   bool noShapes();
   void populateModeActions();
   void setClean();
