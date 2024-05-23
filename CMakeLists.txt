@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(
   labelmeplus
-  VERSION 0.1
+  VERSION 0.1.0
   LANGUAGES CXX)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -14,114 +12,90 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# https://json.nlohmann.me/api/macros/json_use_implicit_conversions/
-# set(nlohmann-json_IMPLICIT_CONVERSIONS OFF)
+configure_file(version.h.in version.h)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
-find_package(glog CONFIG REQUIRED)
-find_package(argparse CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
-find_package(OpenCV CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(yaml-cpp CONFIG REQUIRED)
-find_package(Boost REQUIRED COMPONENTS context)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
-find_path(PNGPP_INCLUDE_DIRS "png++/color.hpp")
-find_path(LIBEXIF_INCLUDE_DIRS "libexif/exif-data.h")
-find_library(LIBEXIF_LIBRARY "libexif")
+set(TS_FILES labelmeplus_zh_CN.ts)
 
-set(PROJECT_SOURCES
-    init.h
-    main.cpp
-    app.cpp
-    app.h
-    shape.h
-    shape.cpp
-    base64.cpp
-    base64.h
-    label_file.cpp
-    label_file.h
-    imgviz.hpp
-    os.h
-    os.c
-    opener.h
-    opener.c
-    config/config.h
-    config/config.cpp
-    utils/io.cpp
-    utils/shape.cpp
-    utils/qt.cpp
-    utils/image.cpp
-    utils/utils.h
-    widgets/label_dialog.cpp
-    widgets/label_dialog.h
-    widgets/label_list_widget.cpp
-    widgets/label_list_widget.h
-    widgets/unique_label_qlist_widget.cpp
-    widgets/unique_label_qlist_widget.h
-    widgets/escapable_qlist_widget.cpp
-    widgets/escapable_qlist_widget.h
-    widgets/zoom_widget.cpp
-    widgets/zoom_widget.h
-    widgets/canvas.cpp
-    widgets/canvas.h
-    widgets/tool_bar.cpp
-    widgets/tool_bar.h
-    widgets/brightness_contrast_dialog.h
-    widgets/brightness_contrast_dialog.cpp
-    widgets/file_dialog_preview.h
-    widgets/file_dialog_preview.cpp)
+set(PROJECT_SOURCES main.cpp app.cpp app.h ${TS_FILES})
 
-if(WIN32)
-  add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
+include(FetchContent)
+
+# fetch yaml-cpp
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG 0.8.0
+)
+FetchContent_GetProperties(yaml-cpp)
+if(NOT yaml-cpp_POPULATED)
+  message(STATUS "Fetching yaml-cpp...")
+  FetchContent_Populate(yaml-cpp)
+  add_subdirectory(${yaml-cpp_SOURCE_DIR} ${yaml-cpp_BINARY_DIR})
+endif()
+
+# fetch argparse
+FetchContent_Declare(
+    argparse
+    GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+    GIT_TAG v3.0
+)
+FetchContent_GetProperties(argparse)
+if(NOT argparse_POPULATED)
+  message(STATUS "Fetching argparse...")
+  FetchContent_Populate(argparse)
+  add_subdirectory(${argparse_SOURCE_DIR} ${argparse_BINARY_DIR})
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  qt_add_executable(labelmeplus MANUAL_FINALIZATION ${PROJECT_SOURCES})
+  qt_add_executable(labelmeplus MANUAL_FINALIZATION ${PROJECT_SOURCES}
+      widgets/label_dialog.h widgets/label_dialog.cpp
+      config.h)
   # Define target properties for Android with Qt 6 as: set_property(TARGET
   # labelmeplus APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
   # ${CMAKE_CURRENT_SOURCE_DIR}/android) For more information, see
   # https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+
+  qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
   if(ANDROID)
-    add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
+    add_library(labelmeplus SHARED ${PROJECT_SOURCES})
     # Define properties for Android with Qt 5 after find_package() calls as:
     # set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
   else()
-    add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+    add_executable(labelmeplus ${PROJECT_SOURCES})
   endif()
+
+  qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-          glog::glog
-          argparse::argparse
-          fmt::fmt-header-only
-          nlohmann_json::nlohmann_json
-          yaml-cpp
-          Boost::context
-          ${OpenCV_LIBS}
-          ${LIBEXIF_LIBRARY})
+target_include_directories(labelmeplus PRIVATE "${PROJECT_BINARY_DIR}")
+target_link_libraries(labelmeplus PRIVATE Qt${QT_VERSION_MAJOR}::Widgets yaml-cpp::yaml-cpp argparse)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${PNGPP_INCLUDE_DIRS}
-                                                   ${LIBEXIF_INCLUDE_DIRS})
-
+# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1. If
+# you are developing for iOS or macOS you should consider setting an explicit,
+# fixed bundle identifier manually though.
+if(${QT_VERSION} VERSION_LESS 6.1.0)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.labelmeplus)
+endif()
 set_target_properties(
-  ${PROJECT_NAME}
-  PROPERTIES MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-             MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-             MACOSX_BUNDLE_SHORT_VERSION_STRING
-             ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-             MACOSX_BUNDLE TRUE
-             WIN32_EXECUTABLE TRUE)
+  labelmeplus
+  PROPERTIES
+  ${BUNDLE_ID_OPTION}
+  MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+  MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+  MACOSX_BUNDLE TRUE
+  WIN32_EXECUTABLE TRUE)
 
+include(GNUInstallDirs)
 install(
-  TARGETS ${PROJECT_NAME}
+  TARGETS labelmeplus
   BUNDLE DESTINATION .
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(QT_VERSION_MAJOR EQUAL 6)
-  qt_finalize_executable(${PROJECT_NAME})
+  qt_finalize_executable(labelmeplus)
 endif()
