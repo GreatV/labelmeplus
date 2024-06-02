@@ -24,9 +24,8 @@ class LabelDialog : public QDialog {
  public:
   explicit LabelDialog(const QString& text = "Enter object label",
                        QWidget* parent = nullptr,
-                       const QStringList& labels = {},
-                       const bool sort_labels = true,
-                       const bool show_text_field = true,
+                       const QStringList& labels = {}, bool sort_labels = true,
+                       bool show_text_field = true,
                        const QString& completion = "startwith",
                        const std::map<QString, bool>& fit_to_content = {},
                        const std::map<QString, bool>& flags = {});

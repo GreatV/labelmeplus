@@ -7,11 +7,20 @@
 #include "version.h"
 
 int main(int argc, char *argv[]) {
-  argparse::ArgumentParser parser("labelme++");
-  parser.add_argument("-V", "--version")
+  argparse::ArgumentParser parser("labelme++", "0.0",
+                                  argparse::default_arguments::none);
+  parser.add_argument("--version", "-v")
       .default_value(false)
       .implicit_value(true)
       .help("show version");
+  parser.add_argument("--reset-config")
+      .default_value(false)
+      .implicit_value(true)
+      .help("reset qt config");
+  parser.add_argument("--logger-level")
+      .default_value(std::string{"debug"})
+      .choices("debug", "info", "warning", "fatal", "error")
+      .help("logger level");
 
   try {
     parser.parse_args(argc, argv);
