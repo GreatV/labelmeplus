@@ -17,6 +17,9 @@ configure_file(version.h.in version.h)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
+find_package(Glog REQUIRED)
+
+
 set(TS_FILES labelmeplus_zh_CN.ts)
 
 set(PROJECT_SOURCES main.cpp app.cpp app.h ${TS_FILES})
@@ -72,7 +75,7 @@ else()
 endif()
 
 target_include_directories(labelmeplus PRIVATE "${PROJECT_BINARY_DIR}")
-target_link_libraries(labelmeplus PRIVATE Qt${QT_VERSION_MAJOR}::Widgets yaml-cpp::yaml-cpp argparse)
+target_link_libraries(labelmeplus PRIVATE Qt${QT_VERSION_MAJOR}::Widgets yaml-cpp::yaml-cpp argparse glog::glog)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1. If
 # you are developing for iOS or macOS you should consider setting an explicit,
